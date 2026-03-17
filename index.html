@@ -570,7 +570,7 @@ async function callAnthropic(apiKey, messages, maxTokens) {
     headers["x-api-key"] = apiKey;
     headers["anthropic-dangerous-direct-browser-access"] = "true";
   }
-  const res = await fetch("https://thought-leader-5000.kristin-s-dahl.workers.workers.dev", {
+  const res = await fetch("https://thought-leader-5000.kristin-s-dahl.workers.dev", {
     method: "POST",
     headers,
     body: JSON.stringify({
