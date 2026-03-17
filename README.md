@@ -1,6 +1,6 @@
-# Thought Leader Simulator
+# Thought Leader 5000
 
-**LinkedIn, but honest.**
+**For when you have nothing to say but need to say it.**
 
 Three tools for the LinkedIn-weary:
 
