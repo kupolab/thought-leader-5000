@@ -565,14 +565,14 @@ const FAKE_COMMENTS = [
 
 // ── API helper ─────────────────────────────────────────────
 async function callAnthropic(apiKey, messages, maxTokens) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const headers = { "Content-Type": "application/json", "anthropic-version": "2023-06-01" };
+  if (apiKey) {
+    headers["x-api-key"] = apiKey;
+    headers["anthropic-dangerous-direct-browser-access"] = "true";
+  }
+  const res = await fetch("https://thought-leader-5000.kristin-s-dahl.workers.workers.dev", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true",
-    },
+    headers,
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
       max_tokens: maxTokens,
@@ -688,7 +688,7 @@ function App() {
           <div className="api-key-section">
             <input
               type="password"
-              placeholder="Anthropic API key (sk-ant-...)"
+              placeholder="Anthropic API key (optional — sk-ant-...)"
               value={apiKey}
               onChange={e => saveKey(e.target.value)}
             />
@@ -791,7 +791,6 @@ function BuildPost({ apiKey }) {
   const previewText = [getSlotValue(0), "", getSlotValue(1), "", `Industry: ${getSlotValue(2)}`, "", getSlotValue(3)].join("\n");
 
   const generate = async () => {
-    if (!apiKey) { setError("Please enter your Anthropic API key above."); return; }
     setGenerating(true); setError(""); setRoastText(""); setGeneratedPost("");
     setLiked(false); setFakeComment("");
 
@@ -819,7 +818,7 @@ function BuildPost({ apiKey }) {
   };
 
   const roast = async () => {
-    if (!apiKey || !generatedPost) return;
+    if (!generatedPost) return;
     setRoasting(true); setError("");
     setHaterName(pickRandom(HATER_NAMES));
     try {
@@ -1029,7 +1028,6 @@ function RoastProfile({ apiKey }) {
   };
 
   const roast = async () => {
-    if (!apiKey) { setError("Please enter your Anthropic API key above."); return; }
     if (!headline.trim()) { setError("Please enter at least a headline."); return; }
     setLoading(true); setError(""); setResult(null); setRewriteText("");
     setArchetypeRevealed(false);
@@ -1073,7 +1071,6 @@ function RoastProfile({ apiKey }) {
   };
 
   const rewrite = async () => {
-    if (!apiKey) return;
     setRewriting(true);
     try {
       const text = await callAnthropic(apiKey, [{
@@ -1247,7 +1244,6 @@ function FixHeadline({ apiKey }) {
   };
 
   const generate = async () => {
-    if (!apiKey) { setError("Please enter your Anthropic API key above."); return; }
     if (!userInput.trim()) { setError("Tell us what you actually do first."); return; }
     setLoading(true); setError("");
 
