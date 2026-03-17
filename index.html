@@ -736,6 +736,7 @@ function BuildPost({ apiKey }) {
   const [liked, setLiked] = useState(false);
   const [fakeComment, setFakeComment] = useState("");
   const [haterName, setHaterName] = useState("");
+  const [genKey, setGenKey] = useState(0);
   const loadingInterval = useRef(null);
   const [showToast, toastEl] = useToast();
 
@@ -806,6 +807,7 @@ function BuildPost({ apiKey }) {
         content: `You are generating content for a LinkedIn satire tool. Write a hilariously bad LinkedIn post that sounds EXACTLY like a real LinkedIn post — overly inspirational, humblebraggy, full of corporate buzzwords, with unnecessary line breaks and engagement bait.\n\nHook: "${getSlotValue(0)}"\nCore message: "${getSlotValue(1)}"\nIndustry context: "${getSlotValue(2)}"\nClosing line: "${getSlotValue(3)}"\n\nWrite 8-12 lines. No preamble. Just the post.`
       }], 400);
       setGeneratedPost(result);
+      setGenKey(k => k + 1);
       setReactions({ fire: randInt(100, 500), clap: randInt(30, 150), think: randInt(10, 80), impressions: randInt(1000, 9999) });
     } catch (e) {
       setError(pickRandom(ERROR_MESSAGES) + "\n\n(" + e.message + ")");
@@ -925,7 +927,7 @@ function BuildPost({ apiKey }) {
 
       {/* Generated post */}
       {generatedPost && !generating && (
-        <div className="card slide-up" style={{ marginTop: 10 }}>
+        <div className="card slide-up" key={`post-${genKey}`} style={{ marginTop: 10 }}>
           <div className="post-header">
             <div className="avatar">YO</div>
             <div>
@@ -987,12 +989,12 @@ function BuildPost({ apiKey }) {
 
       {/* Share */}
       {generatedPost && typingDone && (
-        <div className="share-card slide-up" style={{ marginTop: 10 }}>
+        <div className="share-card slide-up" key={`share-${genKey}`} style={{ marginTop: 10 }}>
           <div className="share-label">YOUR SHAREABLE POST</div>
           <div className="share-text">{shareText}</div>
           <div className="btn-group">
             <button className="btn-primary" onClick={copyShare}>Copy to clipboard</button>
-            <button className="btn-outline" onClick={() => window.open("https://www.linkedin.com/sharing/share-offsite/?url=https://kupolab.itch.io/thought-leader-5000", "_blank")}>
+            <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(shareText); setCopyMsg("Copied to clipboard! Paste it into the LinkedIn post composer."); setTimeout(() => setCopyMsg(""), 4000); window.open("https://www.linkedin.com/feed/?shareActive=true", "_blank"); }}>
               Post to LinkedIn ↗
             </button>
           </div>
@@ -1204,7 +1206,7 @@ function RoastProfile({ apiKey }) {
           <div className="share-text">{shareText}</div>
           <div className="btn-group">
             <button className="btn-primary" onClick={copyShare}>Copy to clipboard</button>
-            <button className="btn-outline" onClick={() => window.open("https://www.linkedin.com/sharing/share-offsite/?url=https://kupolab.itch.io/thought-leader-5000", "_blank")}>
+            <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(shareText); setCopyMsg("Copied to clipboard! Paste it into the LinkedIn post composer."); setTimeout(() => setCopyMsg(""), 4000); window.open("https://www.linkedin.com/feed/?shareActive=true", "_blank"); }}>
               Post to LinkedIn ↗
             </button>
           </div>
@@ -1369,7 +1371,7 @@ function FixHeadline({ apiKey }) {
           <div className="share-text">{shareText}</div>
           <div className="btn-group">
             <button className="btn-primary" onClick={copyShare}>Copy to clipboard</button>
-            <button className="btn-outline" onClick={() => window.open("https://www.linkedin.com/sharing/share-offsite/?url=https://kupolab.itch.io/thought-leader-5000", "_blank")}>
+            <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(shareText); setCopyMsg("Copied to clipboard! Paste it into the LinkedIn post composer."); setTimeout(() => setCopyMsg(""), 4000); window.open("https://www.linkedin.com/feed/?shareActive=true", "_blank"); }}>
               Post to LinkedIn ↗
             </button>
           </div>
