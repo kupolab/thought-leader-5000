@@ -676,6 +676,26 @@ function App() {
       </header>
 
       <div className="content">
+        <div className="card" style={{ marginBottom: 10, textAlign: "center", padding: "20px 24px" }}>
+          <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--li-text)", marginBottom: 16 }}>
+            Thought Leader 5000 is a next-generation personal branding solution designed to help visionary professionals leverage their authentic voice at scale. Powered by AI. Disruption-ready. Synergy-inclusive. We are thrilled and humbled to be on this journey with you.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+            <blockquote style={{ fontStyle: "italic", fontSize: 12, color: "var(--li-muted)", lineHeight: 1.6, margin: 0, padding: "0 12px", borderLeft: "2px solid var(--li-border)" }}>
+              "Finally, an AI that posts exactly like a human who has never felt genuine emotion."
+              <span style={{ display: "block", marginTop: 2, fontSize: 11, fontStyle: "normal" }}>— A LinkedIn Influencer, probably</span>
+            </blockquote>
+            <blockquote style={{ fontStyle: "italic", fontSize: 12, color: "var(--li-muted)", lineHeight: 1.6, margin: 0, padding: "0 12px", borderLeft: "2px solid var(--li-border)" }}>
+              "I showed this to my CEO. He cried. Then he posted."
+              <span style={{ display: "block", marginTop: 2, fontSize: 11, fontStyle: "normal" }}>— Anonymous, Senior Director</span>
+            </blockquote>
+            <blockquote style={{ fontStyle: "italic", fontSize: 12, color: "var(--li-muted)", lineHeight: 1.6, margin: 0, padding: "0 12px", borderLeft: "2px solid var(--li-border)" }}>
+              "The most important business tool since the out-of-office auto-reply."
+              <span style={{ display: "block", marginTop: 2, fontSize: 11, fontStyle: "normal" }}>— Forbes (Unverified)</span>
+            </blockquote>
+          </div>
+        </div>
+
         <div className="mode-selector">
           {["Build a Post", "Roast My Profile", "Fix My Headline"].map((label, i) => (
             <button key={i} className={`mode-btn ${mode === i ? "active" : ""}`} onClick={() => setMode(i)}>
