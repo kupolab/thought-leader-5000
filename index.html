@@ -1332,7 +1332,6 @@ function RoastProfile({ apiKey }) {
             <button className="btn-danger" onClick={rewrite} disabled={rewriting}>
               {rewriting ? "Rewriting..." : "Write me a better headline"}
             </button>
-            <button className="btn-primary" onClick={copyShare}>Share this roast</button>
             <button className="btn-outline" onClick={reset}>Roast another</button>
           </div>
 
@@ -1346,19 +1345,6 @@ function RoastProfile({ apiKey }) {
         </div>
       )}
 
-      {result && (
-        <div className="share-card card-enter">
-          <div className="share-label">YOUR SHAREABLE ROAST</div>
-          <div className="share-text">{shareText}</div>
-          <div className="btn-group">
-            <button className="btn-primary" onClick={copyShare}>Copy to clipboard</button>
-            <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(shareText); setCopyMsg("Copied to clipboard! Paste it into LinkedIn."); setTimeout(() => setCopyMsg(""), 4000); window.open("https://www.linkedin.com/sharing/share-offsite/?url=https://kupolab.github.io/thought-leader-5000", "_blank"); }}>
-              Post to LinkedIn ↗
-            </button>
-          </div>
-          {copyMsg && <div className="copy-confirm">{copyMsg}</div>}
-        </div>
-      )}
     </div>
   );
 }
