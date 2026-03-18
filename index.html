@@ -835,7 +835,7 @@ function App() {
 
       <div className="content">
         <div className="mode-selector">
-          {["Build a Post", "Roast My Profile", "Fix My Headline"].map((label, i) => (
+          {["Build a Post", "Roast My Profile"].map((label, i) => (
             <button key={i} className={`mode-btn ${mode === i ? "active" : ""}`} onClick={() => setMode(i)}>
               {label}
             </button>
@@ -846,17 +846,6 @@ function App() {
           {mode === 0 && <BuildPost apiKey={apiKey} />}
           {mode === 1 && <RoastProfile apiKey={apiKey} />}
           {mode === 2 && <FixHeadline apiKey={apiKey} />}
-        </div>
-
-        <div style={{ textAlign: "center", marginTop: 10 }}>
-          <a href="https://buymeacoffee.com/kupolab" target="_blank" rel="noopener" style={{
-            background: "#FFDD00", border: "none", borderRadius: 20,
-            padding: "6px 14px", fontSize: 11, fontWeight: 500, color: "#000",
-            textDecoration: "none", display: "inline-block"
-          }} onMouseOver={e => e.currentTarget.style.background = "#f0cc00"}
-             onMouseOut={e => e.currentTarget.style.background = "#FFDD00"}>
-            Like this? Buy Kristin a coffee ☕
-          </a>
         </div>
 
         <footer className="footer">
