@@ -784,11 +784,6 @@ function WelcomeModal({ onDismiss }) {
             background: "var(--li-blue)", color: "white", fontSize: 14,
             fontWeight: 500, cursor: "pointer", fontFamily: "inherit"
           }}>Accept and begin disrupting</button>
-          <button onClick={dismiss} style={{
-            width: "100%", padding: 10, borderRadius: 20,
-            border: "1px solid var(--li-border)", background: "white",
-            color: "var(--li-muted)", fontSize: 13, cursor: "pointer", fontFamily: "inherit"
-          }}>Ignore (not recommended by LinkedIn)</button>
         </div>
       </div>
     </div>
@@ -812,8 +807,7 @@ function App() {
     setTimeout(() => setSettingsSaved(false), 2000);
   };
   const showIntro = () => {
-    localStorage.removeItem("tl5000_welcomed");
-    window.location.reload();
+    setShowWelcome(true);
   };
 
   if (showWelcome) {
@@ -850,16 +844,12 @@ function App() {
 
         <footer className="footer">
           A Kupolab Production · Not affiliated with LinkedIn · Thrilled and humbled to announce: this footer.<br />
-          <a href="https://kupolab.itch.io/thought-leader-5000" target="_blank" rel="noopener">itch.io</a>
-          {" · "}
-          <a href="https://github.com/kupolab/thought-leader-5000" target="_blank" rel="noopener">GitHub</a>
-          {" · "}
           <a href="#" onClick={e => { e.preventDefault(); setShowSettings(s => !s); }}>
             {showSettings ? "Hide settings" : "⚙ Settings"}
           </a>
           {" · "}
           <a href="#" onClick={e => { e.preventDefault(); showIntro(); }}>
-            Show intro
+            About
           </a>
           {showSettings && (
             <div className="settings-panel">
