@@ -67,15 +67,6 @@ body {
   transition: opacity 0.3s ease;
 }
 .header-quote.fading { opacity: 0; }
-.header-coffee {
-  flex-shrink: 0; margin-left: 14px;
-}
-.header-coffee a {
-  background: #FFDD00; color: #000; border: none; border-radius: 20px;
-  padding: 6px 14px; font-size: 11px; font-weight: 500;
-  text-decoration: none; white-space: nowrap; display: inline-block;
-}
-.header-coffee a:hover { background: #f0cc00; }
 .header-row2 { display: none; }
 
 /* Content */
@@ -430,7 +421,6 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   .mode-btn { padding: 8px 16px; font-size: 13px; }
   .mode-selector { gap: 6px; margin: 12px auto; }
   .header-center, .header-quote-wrap { display: none; }
-  .header-coffee a { padding: 5px 10px; font-size: 10px; }
   .header-row2 {
     display: block; text-align: center; padding-top: 6px;
     font-size: 11px; color: white; opacity: 0.75;
@@ -839,9 +829,6 @@ function App() {
           <div className="header-quote-wrap">
             <RotatingQuote />
           </div>
-          <div className="header-coffee">
-            <a href="https://buymeacoffee.com/kupolab" target="_blank" rel="noopener">Like this? Buy Kristin a coffee ☕</a>
-          </div>
         </div>
         <div className="header-row2">For when you have nothing to say but need to say it.</div>
       </header>
@@ -861,20 +848,14 @@ function App() {
           {mode === 2 && <FixHeadline apiKey={apiKey} />}
         </div>
 
-        <div style={{
-          background: "white", borderTop: "1px solid var(--li-border)",
-          padding: "12px 20px", maxWidth: 680, margin: "0 auto", width: "100%",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          boxSizing: "border-box", borderRadius: 8, marginTop: 10
-        }}>
-          <span style={{ fontSize: 13, color: "var(--li-muted)" }}>Thought Leader 5000 is free. The API bill is not.</span>
+        <div style={{ textAlign: "center", marginTop: 10 }}>
           <a href="https://buymeacoffee.com/kupolab" target="_blank" rel="noopener" style={{
             background: "#FFDD00", border: "none", borderRadius: 20,
-            padding: "7px 16px", fontSize: 13, fontWeight: 500, color: "#000",
-            textDecoration: "none", whiteSpace: "nowrap", display: "inline-block"
+            padding: "6px 14px", fontSize: 11px, fontWeight: 500, color: "#000",
+            textDecoration: "none", display: "inline-block"
           }} onMouseOver={e => e.currentTarget.style.background = "#f0cc00"}
              onMouseOut={e => e.currentTarget.style.background = "#FFDD00"}>
-            ☕ Buy Kristin a coffee
+            Like this? Buy Kristin a coffee ☕
           </a>
         </div>
 
