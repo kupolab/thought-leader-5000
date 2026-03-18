@@ -737,8 +737,17 @@ function BuildPost({ apiKey }) {
   const [fakeComment, setFakeComment] = useState("");
   const [haterName, setHaterName] = useState("");
   const [genKey, setGenKey] = useState(0);
+  const [subtitle, setSubtitle] = useState("");
   const loadingInterval = useRef(null);
   const [showToast, toastEl] = useToast();
+
+  const SUBTITLE_POOLS = [
+    ["Disruptor", "Innovator", "Visionary", "Catalyst", "Evangelist", "Strategist", "Futurist", "Trailblazer", "Change Agent", "Architect of Change"],
+    ["Keynote Speaker", "Author", "Advisor", "Mentor", "Coach", "Podcaster", "TEDx Alum", "Forbes 30 Under 30 Applicant", "LinkedIn Top Voice (Self-Declared)", "Angel Investor (1 Deal)"],
+    ["Dog Dad", "Cat Mom", "Plant Parent", "Dog Mom", "Cat Dad", "Rescue Dog Advocate", "Proud Parent", "Marathon Runner", "Yoga Enthusiast", "CrossFit Survivor", "Peloton Addict", "Amateur Chef"],
+    ["Coffee", "Matcha", "Oat Milk Flat White", "Cold Brew", "Espresso Martini", "Kombucha", "Mushroom Coffee", "Chai", "Decaf (Just Kidding)"]
+  ];
+  const generateSubtitle = () => SUBTITLE_POOLS.map(pool => pool[randInt(0, pool.length - 1)]).join(" · ");
 
   const [typedPost, typingDone] = useTypewriter(generatedPost, 10);
 
@@ -787,7 +796,6 @@ function BuildPost({ apiKey }) {
   };
 
   const getSlotValue = (i) => isCustom[i] ? customs[i] : slots[i];
-  const previewText = [getSlotValue(0), "", getSlotValue(1), "", `Industry: ${getSlotValue(2)}`, "", getSlotValue(3)].join("\n");
 
   const generate = async () => {
     setGenerating(true); setError(""); setRoastText(""); setGeneratedPost("");
@@ -807,6 +815,7 @@ function BuildPost({ apiKey }) {
       }], 400);
       setGeneratedPost(result);
       setGenKey(k => k + 1);
+      setSubtitle(generateSubtitle());
       setReactions({ fire: randInt(100, 500), clap: randInt(30, 150), think: randInt(10, 80), impressions: randInt(1000, 9999) });
     } catch (e) {
       setError(pickRandom(ERROR_MESSAGES) + "\n\n(" + e.message + ")");
@@ -888,18 +897,6 @@ function BuildPost({ apiKey }) {
         ))}
       </div>
 
-      {/* Preview */}
-      <div className="card">
-        <div className="post-header">
-          <div className="avatar">YO</div>
-          <div>
-            <div className="post-name">You (Thought Leader)</div>
-            <div className="post-subtitle">Disruptor · Visionary · Dog Dad · Coffee</div>
-          </div>
-        </div>
-        <div className="post-body">{previewText}</div>
-      </div>
-
       {/* Actions */}
       <div className="btn-group btn-group-center">
         <button className="btn-primary" onClick={generate} disabled={generating}>
@@ -930,7 +927,7 @@ function BuildPost({ apiKey }) {
             <div className="avatar">YO</div>
             <div>
               <div className="post-name">You (Thought Leader)</div>
-              <div className="post-subtitle">Disruptor · Visionary · Dog Dad · Coffee</div>
+              <div className="post-subtitle">{subtitle}</div>
             </div>
           </div>
           <div className="post-body">
