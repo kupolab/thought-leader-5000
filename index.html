@@ -57,8 +57,8 @@ body {
   text-align: center; flex: 1; padding: 0 16px;
 }
 .header-right {
-  flex-shrink: 0; max-width: 340px; text-align: right;
-  min-height: 36px; position: relative;
+  flex-shrink: 0; width: 340px; text-align: right;
+  height: 48px; position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: flex-end;
 }
 .header-quote {
@@ -703,9 +703,11 @@ function useTypewriter(text, speed = 12) {
 // ── Toast Hook ─────────────────────────────────────────────
 function useToast() {
   const [toast, setToast] = useState(null);
+  const timerRef = useRef(null);
   const show = (msg, duration = 3000) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
     setToast(msg);
-    setTimeout(() => setToast(null), duration);
+    timerRef.current = setTimeout(() => { setToast(null); timerRef.current = null; }, duration);
   };
   const el = toast ? React.createElement('div', { className: 'toast' }, toast) : null;
   return [show, el];
@@ -864,7 +866,7 @@ function App() {
               <div className="section-label">SETTINGS</div>
               <input
                 type="password"
-                placeholder="Anthropic API key (optional — sk-ant-...)"
+                placeholder="Anthropic API key (optional, starts with sk-ant-)"
                 value={apiKey}
                 onChange={e => setApiKey(e.target.value)}
                 style={{ marginTop: 8 }}
@@ -1117,11 +1119,6 @@ function BuildPost({ apiKey }) {
             </div>
           )}
         </div>
-      )}
-
-      {/* AI label */}
-      {generatedPost && !generating && typingDone && (
-        <div className="ai-label">✨ AI-generated</div>
       )}
 
       {/* Fake comment */}
