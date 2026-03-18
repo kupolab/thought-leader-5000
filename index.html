@@ -392,7 +392,8 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 
 /* Welcome modal */
 .welcome-overlay {
-  min-height: 100vh; background: rgba(0,0,0,0.5);
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 1000;
   display: flex; align-items: center; justify-content: center;
   padding: 16px; animation: fadeIn 0.15s ease-out;
 }
@@ -810,12 +811,9 @@ function App() {
     setShowWelcome(true);
   };
 
-  if (showWelcome) {
-    return <WelcomeModal onDismiss={() => setShowWelcome(false)} />;
-  }
-
   return (
     <div>
+      {showWelcome && <WelcomeModal onDismiss={() => setShowWelcome(false)} />}
       <header className="header">
         <div className="header-left">
           <span className="header-logo">TL</span>
