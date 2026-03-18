@@ -43,26 +43,41 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  animation: staggerIn 0.4s ease-out both;
 }
-.header-left { display: flex; align-items: center; gap: 10px; }
+.header-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .header-logo {
   font-size: 18px; font-weight: 700; color: white;
   background: white; color: var(--li-blue);
   padding: 1px 5px 2px; border-radius: 3px;
 }
 .header-app-name { font-size: 12px; color: white; opacity: 0.8; }
-.header-tagline { font-size: 11px; color: white; opacity: 0.65; }
+.header-center {
+  font-size: 12px; color: white; opacity: 0.75;
+  text-align: center; flex: 1; padding: 0 16px;
+}
+.header-right {
+  flex-shrink: 0; max-width: 280px; text-align: right;
+  min-height: 32px; position: relative;
+}
+.header-quote {
+  font-size: 11px; color: white; opacity: 0.65;
+  font-style: italic; line-height: 1.4;
+  transition: opacity 0.5s ease;
+}
+.header-quote.fading { opacity: 0; }
 
 /* Content */
-.content { max-width: 680px; margin: 0 auto; padding: 10px 12px 40px; }
+.content { max-width: 900px; margin: 0 auto; padding: 10px 12px 40px; }
 
 /* Mode selector */
 .mode-selector {
   display: flex; gap: 6px; justify-content: center;
   padding: 12px 0; flex-wrap: wrap;
+  animation: staggerIn 0.4s ease-out 0.15s both;
 }
 .mode-btn {
-  border-radius: 20px; padding: 8px 20px; font-size: 13px;
+  border-radius: 20px; padding: 10px 24px; font-size: 14px;
   font-weight: 500; cursor: pointer; border: 1px solid var(--li-border);
   background: white; color: var(--li-muted);
   font-family: inherit; transition: all 0.2s;
@@ -121,13 +136,13 @@ body {
 .btn-ghost:hover { background: var(--li-gray-bg); }
 
 /* Inputs */
-textarea, input[type="text"] {
+textarea, input[type="text"], input[type="password"] {
   border: 1px solid var(--li-border); border-radius: 8px;
   padding: 10px 12px; font-size: 13px; font-family: inherit;
   width: 100%; resize: vertical; color: var(--li-text);
   transition: border-color 0.15s;
 }
-textarea:focus, input[type="text"]:focus {
+textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   border-color: var(--li-blue); outline: none;
 }
 
@@ -173,6 +188,18 @@ textarea:focus, input[type="text"]:focus {
   0% { transform: translateY(0); opacity: 0.5; }
   50% { transform: translateY(-2px); opacity: 0.7; }
   100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Two-column composer layout */
+.composer-layout {
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.composer-left { flex: 55; min-width: 0; }
+.composer-right { flex: 45; min-width: 0; position: sticky; top: 16px; }
+
+@media (max-width: 900px) {
+  .composer-layout { flex-direction: column; }
+  .composer-right { position: static; }
 }
 
 /* Avatar */
@@ -302,6 +329,13 @@ textarea:focus, input[type="text"]:focus {
 .footer a { color: var(--li-blue); text-decoration: none; }
 .footer a:hover { text-decoration: underline; }
 
+/* Settings panel */
+.settings-panel {
+  background: var(--li-surface); border: 1px solid var(--li-border);
+  border-radius: 8px; padding: 14px 16px; margin-top: 10px;
+  animation: slideUp 0.25s ease-out;
+}
+
 /* API key input */
 .api-key-section {
   display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
@@ -332,12 +366,20 @@ textarea:focus, input[type="text"]:focus {
   0% { opacity: 0; }
   100% { opacity: 1; }
 }
+@keyframes staggerIn {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes buttonReveal {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
 .slide-up { animation: slideUp 0.35s ease-out; }
 .fade-in { animation: fadeIn 0.3s ease-out; }
 
 /* Mode panel transition */
 .mode-panel {
-  animation: slideUp 0.25s ease-out;
+  animation: staggerIn 0.4s ease-out 0.3s both;
 }
 
 /* Typewriter cursor */
@@ -378,11 +420,45 @@ textarea:focus, input[type="text"]:focus {
 /* Action bar buttons active states */
 .action-bar .btn-ghost.liked { color: var(--li-blue); font-weight: 500; }
 
+/* Welcome modal */
+.welcome-overlay {
+  min-height: 100vh; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.15s ease-out;
+}
+.welcome-modal {
+  background: white; border-radius: 8px; max-width: 420px; width: 100%;
+  padding: 24px;
+  animation: modalIn 0.2s ease-out;
+}
+@keyframes modalIn {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.welcome-modal.dismissing {
+  animation: modalOut 0.15s ease-in forwards;
+}
+.welcome-overlay.dismissing {
+  animation: fadeOut 0.15s ease-in forwards;
+}
+@keyframes modalOut {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.95); }
+}
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* Responsive */
 @media (max-width: 700px) {
   .content { padding: 8px 8px 40px; }
   .slot-label { width: 40px; min-width: 40px; font-size: 10px; }
-  .mode-btn { padding: 7px 14px; font-size: 12px; }
+  .mode-btn { padding: 8px 16px; font-size: 13px; }
+  .header { flex-wrap: wrap; gap: 8px; }
+  .header-center { order: 3; flex-basis: 100%; padding: 4px 0 0; }
+  .header-right { display: none; }
 }
 </style>
 </head>
@@ -444,7 +520,7 @@ const INDUSTRIES = [
   "The Post-Hustle Renaissance",
 ];
 const CLOSERS = [
-  "What do YOU think? Drop a 🔥 below.",
+  "What do YOU think? Drop a \u{1F525} below.",
   "Save this post. You'll need it someday.",
   "Tag someone who needs to hear this today.",
   "Repost if you agree. Your network deserves this.",
@@ -457,7 +533,7 @@ const CLOSERS = [
   "This took me 10 years to learn. You got it free. You're welcome.",
   "Be the post you wish to see in the world.",
   "I almost didn't share this. I'm glad I did.",
-  "Drop a 💡 if this sparked something for you.",
+  "Drop a \u{1F4A1} if this sparked something for you.",
   "The algorithm buries posts like this. Prove it wrong.",
 ];
 const ALL_SLOTS = [HOOKS, TOPICS, INDUSTRIES, CLOSERS];
@@ -503,7 +579,7 @@ function countBuzzwords(text) {
 
 // ── Archetype detector ─────────────────────────────────────
 const ARCHETYPES = [
-  { pattern: /passionate|passion/i, name: "The Passionate One™", desc: "Passionate about what, exactly?" },
+  { pattern: /passionate|passion/i, name: "The Passionate One\u2122", desc: "Passionate about what, exactly?" },
   { pattern: /synerg|leverag|unlock/i, name: "The Corporate Poet", desc: "Speaks in business haiku." },
   { pattern: /intersect|junction|nexus/i, name: "The Intersection Person", desc: "Always at the intersection of two things." },
   { pattern: /results|driven|oriented/i, name: "The Results-Driven Driver of Results", desc: "As opposed to the results-averse professionals." },
@@ -547,20 +623,28 @@ const HATER_NAMES = [
   "That One Guy From Your MBA Cohort",
   "Your Ex-Colleague Who Went Into Consulting",
   "Someone Who Comments 'Source?' On Everything",
-  "The Person Who Reacts 🤔 To Everything",
+  "The Person Who Reacts \u{1F914} To Everything",
   "A Recruiter Who Saw Right Through It",
 ];
 
 // ── Fake LinkedIn comments ─────────────────────────────────
 const FAKE_COMMENTS = [
-  "This is so powerful. Needed to hear this today. Following for more. 🙏",
-  "Wow, THIS. Sharing with my entire network. You're a real one. 💯",
+  "This is so powerful. Needed to hear this today. Following for more. \u{1F64F}",
+  "Wow, THIS. Sharing with my entire network. You're a real one. \u{1F4AF}",
   "I'm not crying, you're crying. This is leadership. Pure leadership.",
   "Bookmarking this. Printing this. Tattooing this on my forearm.",
-  "The LinkedIn algorithm doesn't want you to see posts like this. 👀",
+  "The LinkedIn algorithm doesn't want you to see posts like this. \u{1F440}",
   "I showed this to my team in our standup. Three people cried.",
   "This hit different. Agree? Comment 'AGREE' if you agree.",
-  "Incredible insights as always. When's the TED talk? 🎤",
+  "Incredible insights as always. When's the TED talk? \u{1F3A4}",
+];
+
+// ── Header rotating quotes ─────────────────────────────────
+const HEADER_QUOTES = [
+  { text: "Finally, an AI that posts exactly like a human who has never felt genuine emotion.", attr: "A LinkedIn Influencer, probably" },
+  { text: "Clinically shown to increase impressions and decrease self-awareness.", attr: "The Institute for Thought Leadership Science (Not Real)" },
+  { text: "I showed this to my CEO. He cried. Then he posted.", attr: "Anonymous, Senior Director" },
+  { text: "The most important business tool since the out-of-office auto-reply.", attr: "Forbes (Unverified)" },
 ];
 
 // ── API helper ─────────────────────────────────────────────
@@ -596,7 +680,7 @@ function pickRandom(arr, exclude) {
 }
 
 // ── EXAMPLE PROFILE for "Try an example" ───────────────────
-const EXAMPLE_HEADLINE = "Passionate Leader | Innovator | Helping companies unlock their potential | Dad | Dog Dad | Coffee ☕";
+const EXAMPLE_HEADLINE = "Passionate Leader | Innovator | Helping companies unlock their potential | Dad | Dog Dad | Coffee \u2615";
 const EXAMPLE_ABOUT = `I'm a results-driven professional with 15+ years of experience leveraging synergies at the intersection of technology, strategy, and human-centered design thinking.
 
 As a servant leader, I empower cross-functional teams to unlock their full potential while driving measurable outcomes across the enterprise. My authentic approach to leadership has been recognized by both my peers and my LinkedIn followers (12,000+ and growing!).
@@ -656,14 +740,99 @@ const SPIN_MILESTONES = {
   100: "100 spins. You are now officially a Thought Leader.",
 };
 
+// ── Rotating Header Quote ──────────────────────────────────
+function RotatingQuote() {
+  const [idx, setIdx] = useState(0);
+  const [fading, setFading] = useState(false);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFading(true);
+      setTimeout(() => {
+        setIdx(prev => (prev + 1) % HEADER_QUOTES.length);
+        setFading(false);
+      }, 500);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+  const q = HEADER_QUOTES[idx];
+  return (
+    <div className={`header-quote ${fading ? "fading" : ""}`}>
+      "{q.text}" <span style={{ fontStyle: "normal", opacity: 0.8 }}>— {q.attr}</span>
+    </div>
+  );
+}
+
+// ── Welcome Modal ──────────────────────────────────────────
+function WelcomeModal({ onDismiss }) {
+  const [dismissing, setDismissing] = useState(false);
+  const dismiss = () => {
+    setDismissing(true);
+    localStorage.setItem("tl5000_welcomed", "true");
+    setTimeout(() => onDismiss(), 150);
+  };
+  return (
+    <div className={`welcome-overlay ${dismissing ? "dismissing" : ""}`}>
+      <div className={`welcome-modal ${dismissing ? "dismissing" : ""}`}>
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <span style={{ fontSize: 24, color: "var(--li-blue)" }}>{"\u{1F514}"}</span>
+            <div style={{ position: "absolute", top: -2, right: -4, width: 8, height: 8, borderRadius: "50%", background: "var(--li-red)" }} />
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: "50%", background: "var(--li-blue)",
+            color: "white", display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 16, fontWeight: 700, flexShrink: 0
+          }}>TL</div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 500 }}>Thought Leader 5000</div>
+            <div style={{ fontSize: 12, color: "var(--li-muted)", lineHeight: 1.5 }}>
+              Next-Generation Personal Branding Solution · Disruption-Ready · Synergy-Inclusive
+            </div>
+            <div style={{ fontSize: 11, color: "var(--li-blue)", marginTop: 2 }}>127 mutual connections</div>
+          </div>
+        </div>
+        <div style={{ borderTop: "1px solid var(--li-border)", margin: "0 -24px", padding: "0 24px" }}>
+          <div style={{ fontSize: 13, color: "var(--li-text)", lineHeight: 1.7, padding: "16px 0", whiteSpace: "pre-line" }}>
+            Thought Leader 5000 is a next-generation personal branding solution designed to help visionary professionals leverage their authentic voice at scale.{"\n\n"}Powered by AI. Disruption-ready. Synergy-inclusive.{"\n\n"}We are thrilled and humbled to be on this journey with you.
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+          <button onClick={dismiss} style={{
+            width: "100%", padding: 10, borderRadius: 20, border: "none",
+            background: "var(--li-blue)", color: "white", fontSize: 14,
+            fontWeight: 500, cursor: "pointer", fontFamily: "inherit"
+          }}>Accept and begin disrupting</button>
+          <button onClick={dismiss} style={{
+            width: "100%", padding: 10, borderRadius: 20,
+            border: "1px solid var(--li-border)", background: "white",
+            color: "var(--li-muted)", fontSize: 13, cursor: "pointer", fontFamily: "inherit"
+          }}>Ignore (not recommended by LinkedIn)</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ════════════════════════════════════════════════════════════
 // MAIN APP
 // ════════════════════════════════════════════════════════════
 function App() {
   const [mode, setMode] = useState(0);
   const [apiKey, setApiKey] = useState(() => localStorage.getItem("tl5000_apikey") || "");
+  const [showSettings, setShowSettings] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem("tl5000_welcomed"));
 
   const saveKey = (k) => { setApiKey(k); localStorage.setItem("tl5000_apikey", k); };
+  const showIntro = () => {
+    localStorage.removeItem("tl5000_welcomed");
+    window.location.reload();
+  };
+
+  if (showWelcome) {
+    return <WelcomeModal onDismiss={() => setShowWelcome(false)} />;
+  }
 
   return (
     <div>
@@ -672,50 +841,19 @@ function App() {
           <span className="header-logo">TL</span>
           <span className="header-app-name">Thought Leader 5000</span>
         </div>
-        <span className="header-tagline">For when you have nothing to say but need to say it.</span>
+        <div className="header-center">For when you have nothing to say but need to say it.</div>
+        <div className="header-right">
+          <RotatingQuote />
+        </div>
       </header>
 
       <div className="content">
-        <div className="card" style={{ marginBottom: 10, textAlign: "center", padding: "20px 24px" }}>
-          <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--li-text)", marginBottom: 16 }}>
-            Thought Leader 5000 is a next-generation personal branding solution designed to help visionary professionals leverage their authentic voice at scale. Powered by AI. Disruption-ready. Synergy-inclusive. We are thrilled and humbled to be on this journey with you.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-            <blockquote style={{ fontStyle: "italic", fontSize: 12, color: "var(--li-muted)", lineHeight: 1.6, margin: 0, padding: "0 12px", borderLeft: "2px solid var(--li-border)" }}>
-              "Finally, an AI that posts exactly like a human who has never felt genuine emotion."
-              <span style={{ display: "block", marginTop: 2, fontSize: 11, fontStyle: "normal" }}>— A LinkedIn Influencer, probably</span>
-            </blockquote>
-            <blockquote style={{ fontStyle: "italic", fontSize: 12, color: "var(--li-muted)", lineHeight: 1.6, margin: 0, padding: "0 12px", borderLeft: "2px solid var(--li-border)" }}>
-              "I showed this to my CEO. He cried. Then he posted."
-              <span style={{ display: "block", marginTop: 2, fontSize: 11, fontStyle: "normal" }}>— Anonymous, Senior Director</span>
-            </blockquote>
-            <blockquote style={{ fontStyle: "italic", fontSize: 12, color: "var(--li-muted)", lineHeight: 1.6, margin: 0, padding: "0 12px", borderLeft: "2px solid var(--li-border)" }}>
-              "The most important business tool since the out-of-office auto-reply."
-              <span style={{ display: "block", marginTop: 2, fontSize: 11, fontStyle: "normal" }}>— Forbes (Unverified)</span>
-            </blockquote>
-          </div>
-        </div>
-
         <div className="mode-selector">
           {["Build a Post", "Roast My Profile", "Fix My Headline"].map((label, i) => (
             <button key={i} className={`mode-btn ${mode === i ? "active" : ""}`} onClick={() => setMode(i)}>
               {label}
             </button>
           ))}
-        </div>
-
-        <div className="card" style={{ marginBottom: 10 }}>
-          <div className="api-key-section">
-            <input
-              type="password"
-              placeholder="Anthropic API key (optional — sk-ant-...)"
-              value={apiKey}
-              onChange={e => saveKey(e.target.value)}
-            />
-          </div>
-          <div className="api-key-note">
-            Stored locally. Never transmitted. Unlike your career updates, which LinkedIn shares with everyone.
-          </div>
         </div>
 
         <div className="mode-panel" key={mode}>
@@ -725,11 +863,37 @@ function App() {
         </div>
 
         <footer className="footer">
-          A Kupolab Production · Not affiliated with LinkedIn<br />
-          Thrilled and humbled to announce: this footer.<br />
+          A Kupolab Production · Not affiliated with LinkedIn · Thrilled and humbled to announce: this footer.<br />
           <a href="https://kupolab.itch.io/thought-leader-5000" target="_blank" rel="noopener">itch.io</a>
           {" · "}
           <a href="https://github.com/kupolab/thought-leader-5000" target="_blank" rel="noopener">GitHub</a>
+          {" · "}
+          <a href="#" onClick={e => { e.preventDefault(); setShowSettings(s => !s); }} style={{ cursor: "pointer" }}>
+            {showSettings ? "Hide settings" : "\u2699 Settings"}
+          </a>
+          {" · "}
+          <a href="#" onClick={e => { e.preventDefault(); showIntro(); }} style={{ cursor: "pointer" }}>
+            Show intro
+          </a>
+          {showSettings && (
+            <div className="settings-panel">
+              <div className="api-key-section">
+                <input
+                  type="password"
+                  placeholder="Anthropic API key (optional \u2014 sk-ant-...)"
+                  value={apiKey}
+                  onChange={e => saveKey(e.target.value)}
+                />
+              </div>
+              <div className="api-key-note">
+                Stored locally. Never transmitted. Unlike your career updates, which LinkedIn shares with everyone.
+              </div>
+              <div className="btn-group" style={{ justifyContent: "center" }}>
+                <button className="btn-primary" onClick={() => setShowSettings(false)}>Save</button>
+                <a href="#" onClick={e => { e.preventDefault(); setShowSettings(false); }} style={{ fontSize: 12, color: "var(--li-muted)", alignSelf: "center", marginLeft: 4 }}>Close</a>
+              </div>
+            </div>
+          )}
         </footer>
       </div>
     </div>
@@ -749,6 +913,9 @@ function BuildPost({ apiKey }) {
   const [roasting, setRoasting] = useState(false);
   const [error, setError] = useState("");
   const [reactions, setReactions] = useState(null);
+  const [previewReactions, setPreviewReactions] = useState(() => ({
+    fire: randInt(100, 500), clap: randInt(30, 150), think: randInt(10, 80), impressions: randInt(1000, 9999)
+  }));
   const [copyMsg, setCopyMsg] = useState("");
   const [spinning, setSpinning] = useState([false, false, false, false]);
   const [spinCount, setSpinCount] = useState(0);
@@ -757,7 +924,7 @@ function BuildPost({ apiKey }) {
   const [fakeComment, setFakeComment] = useState("");
   const [haterName, setHaterName] = useState("");
   const [genKey, setGenKey] = useState(0);
-  const [subtitle, setSubtitle] = useState("");
+  const [subtitle, setSubtitle] = useState(() => generateSubtitleFn());
   const loadingInterval = useRef(null);
   const [showToast, toastEl] = useToast();
 
@@ -767,7 +934,7 @@ function BuildPost({ apiKey }) {
     ["Dog Dad", "Cat Mom", "Plant Parent", "Dog Mom", "Cat Dad", "Rescue Dog Advocate", "Proud Parent", "Marathon Runner", "Yoga Enthusiast", "CrossFit Survivor", "Peloton Addict", "Amateur Chef"],
     ["Coffee", "Matcha", "Oat Milk Flat White", "Cold Brew", "Espresso Martini", "Kombucha", "Mushroom Coffee", "Chai", "Decaf (Just Kidding)"]
   ];
-  const generateSubtitle = () => SUBTITLE_POOLS.map(pool => pool[randInt(0, pool.length - 1)]).join(" · ");
+  const generateSubtitle = () => SUBTITLE_POOLS.map(pool => pool[randInt(0, pool.length - 1)]).join(" \u00B7 ");
 
   const [typedPost, typingDone] = useTypewriter(generatedPost, 10);
 
@@ -792,6 +959,7 @@ function BuildPost({ apiKey }) {
     if (spinning[i]) return;
     const finalValue = pickRandom(ALL_SLOTS[i], slots[i]);
     animateSpin(i, finalValue);
+    setPreviewReactions({ fire: randInt(100, 500), clap: randInt(30, 150), think: randInt(10, 80), impressions: randInt(1000, 9999) });
     const newCount = spinCount + 1;
     setSpinCount(newCount);
     if (SPIN_MILESTONES[newCount]) showToast(SPIN_MILESTONES[newCount]);
@@ -802,6 +970,7 @@ function BuildPost({ apiKey }) {
     finals.forEach((val, i) => {
       setTimeout(() => animateSpin(i, val), i * 120);
     });
+    setPreviewReactions({ fire: randInt(100, 500), clap: randInt(30, 150), think: randInt(10, 80), impressions: randInt(1000, 9999) });
     const newCount = spinCount + 4;
     setSpinCount(newCount);
     const milestone = Object.keys(SPIN_MILESTONES).map(Number).find(m => m > spinCount && m <= newCount);
@@ -816,6 +985,7 @@ function BuildPost({ apiKey }) {
   };
 
   const getSlotValue = (i) => isCustom[i] ? customs[i] : slots[i];
+  const previewText = [getSlotValue(0), "", getSlotValue(1), "", `Industry: ${getSlotValue(2)}`, "", getSlotValue(3)].join("\n");
 
   const generate = async () => {
     setGenerating(true); setError(""); setRoastText(""); setGeneratedPost("");
@@ -831,7 +1001,7 @@ function BuildPost({ apiKey }) {
     try {
       const result = await callAnthropic(apiKey, [{
         role: "user",
-        content: `You are generating content for a LinkedIn satire tool. Write a hilariously bad LinkedIn post that sounds EXACTLY like a real LinkedIn post — overly inspirational, humblebraggy, full of corporate buzzwords, with unnecessary line breaks and engagement bait.\n\nHook: "${getSlotValue(0)}"\nCore message: "${getSlotValue(1)}"\nIndustry context: "${getSlotValue(2)}"\nClosing line: "${getSlotValue(3)}"\n\nWrite 8-12 lines. No preamble. Just the post.`
+        content: `You are generating content for a LinkedIn satire tool. Write a hilariously bad LinkedIn post that sounds EXACTLY like a real LinkedIn post \u2014 overly inspirational, humblebraggy, full of corporate buzzwords, with unnecessary line breaks and engagement bait.\n\nHook: "${getSlotValue(0)}"\nCore message: "${getSlotValue(1)}"\nIndustry context: "${getSlotValue(2)}"\nClosing line: "${getSlotValue(3)}"\n\nWrite 8-12 lines. No preamble. Just the post.`
       }], 400);
       setGeneratedPost(result);
       setGenKey(k => k + 1);
@@ -851,7 +1021,7 @@ function BuildPost({ apiKey }) {
     try {
       const result = await callAnthropic(apiKey, [{
         role: "user",
-        content: `You are the roast feature in a LinkedIn satire tool. Someone just "posted" this LinkedIn post. Respond in 2-3 sentences as a bitter but self-aware LinkedIn commenter — pedantic, slightly envious, funny through accuracy. You sometimes say "Source?" You are also, despite yourself, kind of a LinkedIn person.\n\nPost: "${generatedPost}"\n\nJust the comment. No preamble.`
+        content: `You are the roast feature in a LinkedIn satire tool. Someone just "posted" this LinkedIn post. Respond in 2-3 sentences as a bitter but self-aware LinkedIn commenter \u2014 pedantic, slightly envious, funny through accuracy. You sometimes say "Source?" You are also, despite yourself, kind of a LinkedIn person.\n\nPost: "${generatedPost}"\n\nJust the comment. No preamble.`
       }], 200);
       setRoastText(result);
     } catch (e) {
@@ -886,45 +1056,76 @@ function BuildPost({ apiKey }) {
   return (
     <div>
       {toastEl}
-      {/* Composer */}
-      <div className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <span className="section-label">CRAFT YOUR POST</span>
-          <button className="btn-ghost" onClick={spinAll}>Spin all ↺</button>
-        </div>
-        {SLOT_LABELS.map((label, i) => (
-          <div className="slot-row" key={i}>
-            <div className="slot-label">{label}</div>
-            <div className="slot-content">
-              {isCustom[i] ? (
-                <div>
-                  <textarea rows={2} placeholder={SLOT_PLACEHOLDERS[i]} value={customs[i]} onChange={e => setCustom(i, e.target.value)} />
-                  <span className="slot-toggle" onClick={() => toggleCustom(i)}>↩ Use preset</span>
-                </div>
-              ) : (
-                <div>
-                  <div className={`slot-pill ${spinning[i] ? "spinning" : ""}`}>{slots[i]}</div>
-                  <span className="slot-toggle" onClick={() => toggleCustom(i)}>✏ Write your own</span>
-                </div>
-              )}
+      {/* Two-column composer */}
+      <div className="composer-layout">
+        <div className="composer-left">
+          <div className="card">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <span className="section-label">CRAFT YOUR POST</span>
+              <button className="btn-ghost" onClick={spinAll}>Spin all \u21BA</button>
             </div>
-            {!isCustom[i] && (
-              <div className="slot-spin">
-                <button className={`btn-ghost ${spinning[i] ? "spinning" : ""}`} onClick={() => spinSlot(i)}>↺</button>
+            {SLOT_LABELS.map((label, i) => (
+              <div className="slot-row" key={i}>
+                <div className="slot-label">{label}</div>
+                <div className="slot-content">
+                  {isCustom[i] ? (
+                    <div>
+                      <textarea rows={2} placeholder={SLOT_PLACEHOLDERS[i]} value={customs[i]} onChange={e => setCustom(i, e.target.value)} />
+                      <span className="slot-toggle" onClick={() => toggleCustom(i)}>{"\u21A9"} Use preset</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className={`slot-pill ${spinning[i] ? "spinning" : ""}`}>{slots[i]}</div>
+                      <span className="slot-toggle" onClick={() => toggleCustom(i)}>{"\u270F"} Write your own</span>
+                    </div>
+                  )}
+                </div>
+                {!isCustom[i] && (
+                  <div className="slot-spin">
+                    <button className={`btn-ghost ${spinning[i] ? "spinning" : ""}`} onClick={() => spinSlot(i)}>{"\u21BA"}</button>
+                  </div>
+                )}
               </div>
-            )}
+            ))}
           </div>
-        ))}
+        </div>
+
+        <div className="composer-right">
+          <div className="card" style={{ position: "relative" }}>
+            <div className="post-header">
+              <div className="avatar" style={{ width: 48, height: 48, fontSize: 16 }}>YO</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 500 }}>You (Thought Leader)</div>
+                <div style={{ fontSize: 12, color: "var(--li-muted)" }}>{subtitle}</div>
+              </div>
+            </div>
+            <div className="post-body">{previewText}</div>
+            <div style={{ borderTop: "1px solid var(--li-border)", marginTop: 12, paddingTop: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--li-muted)", marginBottom: 6 }}>
+                <span>{"\u{1F525}"} {previewReactions.fire} &nbsp; {"\u{1F44F}"} {previewReactions.clap} &nbsp; {"\u{1F914}"} {previewReactions.think}</span>
+                <span>{previewReactions.impressions.toLocaleString()} impressions</span>
+              </div>
+              <div className="action-bar" style={{ borderTop: "1px solid var(--li-border)", marginTop: 0 }}>
+                <span className="btn-ghost" style={{ fontSize: 12, cursor: "default" }}>{"\u{1F44D}"} Like</span>
+                <span className="btn-ghost" style={{ fontSize: 12, cursor: "default" }}>{"\u{1F4AC}"} Comment</span>
+                <span className="btn-ghost" style={{ fontSize: 12, cursor: "default" }}>{"\u2197"} Repost</span>
+                <span className="btn-ghost" style={{ fontSize: 12, cursor: "default" }}>{"\u2709"} Send</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Actions */}
-      <div className="btn-group btn-group-center">
+      <div className="btn-group btn-group-center" style={{ marginBottom: 10 }}>
         <button className="btn-primary" onClick={generate} disabled={generating}>
           {generating ? "Generating..." : "Generate my post"}
         </button>
-        <button className="btn-danger" onClick={roast} disabled={!generatedPost || roasting || !typingDone}>
-          {roasting ? "Roasting..." : "Roast this post"}
-        </button>
+        {generatedPost && typingDone && (
+          <button className="btn-danger" onClick={roast} disabled={roasting} style={{ animation: "buttonReveal 0.15s ease-out" }}>
+            {roasting ? "Roasting..." : "Roast this post"}
+          </button>
+        )}
       </div>
 
       {error && <div className="card slide-up" style={{ marginTop: 10, color: "var(--li-red)", whiteSpace: "pre-line" }}>{error}</div>}
@@ -957,26 +1158,26 @@ function BuildPost({ apiKey }) {
           {typingDone && reactions && (
             <div className="fade-in">
               <div className="reactions-bar">
-                <div className="reactions-left">🔥 {reactions.fire} &nbsp; 👏 {reactions.clap} &nbsp; 🤔 {reactions.think}</div>
+                <div className="reactions-left">{"\u{1F525}"} {reactions.fire} &nbsp; {"\u{1F44F}"} {reactions.clap} &nbsp; {"\u{1F914}"} {reactions.think}</div>
                 <div className="reactions-right">{reactions.impressions.toLocaleString()} impressions</div>
               </div>
               <div className="action-bar">
                 <button className={`btn-ghost ${liked ? "liked" : ""}`} onClick={handleLike}>
-                  {liked ? "👍 Liked" : "👍 Like"}
+                  {liked ? "\u{1F44D} Liked" : "\u{1F44D} Like"}
                 </button>
-                <button className="btn-ghost" onClick={handleComment}>💬 Comment</button>
-                <button className="btn-ghost" onClick={handleRepost}>↗ Repost</button>
-                <button className="btn-ghost" onClick={handleSend}>✉ Send</button>
+                <button className="btn-ghost" onClick={handleComment}>{"\u{1F4AC}"} Comment</button>
+                <button className="btn-ghost" onClick={handleRepost}>{"\u2197"} Repost</button>
+                <button className="btn-ghost" onClick={handleSend}>{"\u2709"} Send</button>
               </div>
             </div>
           )}
-          <div className="ai-label">✨ AI-generated</div>
+          <div className="ai-label">{"\u2728"} AI-generated</div>
           {typingDone && (
             <div className="fade-in" style={{ borderTop: "1px solid var(--li-border)", padding: "10px 16px 4px", marginTop: 8 }}>
               <div className="btn-group">
                 <button className="btn-primary" onClick={copyShare}>Copy to clipboard</button>
                 <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(getShareText()); setCopyMsg("Copied to clipboard! Paste it into the LinkedIn post composer."); setTimeout(() => setCopyMsg(""), 4000); window.open("https://www.linkedin.com/feed/?shareActive=true", "_blank"); }}>
-                  Post to LinkedIn ↗
+                  Post to LinkedIn {"\u2197"}
                 </button>
               </div>
               {copyMsg && <div className="copy-confirm">{copyMsg}</div>}
@@ -989,7 +1190,7 @@ function BuildPost({ apiKey }) {
       {fakeComment && typingDone && (
         <div className="card slide-up" style={{ marginTop: 10 }}>
           <div className="post-header">
-            <div className="avatar" style={{ background: "var(--li-green)" }}>🙏</div>
+            <div className="avatar" style={{ background: "var(--li-green)" }}>{"\u{1F64F}"}</div>
             <div>
               <div className="post-name">LinkedIn Commenter · 2nd+</div>
               <div className="post-subtitle">Commented on your post</div>
@@ -1059,7 +1260,7 @@ function RoastProfile({ apiKey }) {
     try {
       const raw = await callAnthropic(apiKey, [{
         role: "user",
-        content: `You are the Profile Roaster in a LinkedIn satire tool. Roast this profile with surgical, affectionate humor. Be specific — quote their words back, name the clichés, reveal what the corporate language is actually signaling. Tone: a smart friend who loves them but won't let this slide. Not mean. Funny through accuracy.\n\nHeadline: "${headline}"\nAbout: "${about || '(not provided)'}"\n\nRespond in exactly this format:\nROAST: [2-4 paragraphs, specific to their words, under 200 words]\nSUBTEXT:\n* What you wrote: [phrase] / What it means: [translation]\n* What you wrote: [phrase] / What it means: [translation]\n* What you wrote: [phrase] / What it means: [translation]\n\nNo preamble. Stay under 300 words total.`
+        content: `You are the Profile Roaster in a LinkedIn satire tool. Roast this profile with surgical, affectionate humor. Be specific \u2014 quote their words back, name the clich\u00E9s, reveal what the corporate language is actually signaling. Tone: a smart friend who loves them but won't let this slide. Not mean. Funny through accuracy.\n\nHeadline: "${headline}"\nAbout: "${about || '(not provided)'}"\n\nRespond in exactly this format:\nROAST: [2-4 paragraphs, specific to their words, under 200 words]\nSUBTEXT:\n* What you wrote: [phrase] / What it means: [translation]\n* What you wrote: [phrase] / What it means: [translation]\n* What you wrote: [phrase] / What it means: [translation]\n\nNo preamble. Stay under 300 words total.`
       }], 500);
 
       // Parse result
@@ -1155,7 +1356,7 @@ function RoastProfile({ apiKey }) {
       {result && (
         <div className="card roast-result slide-up">
           <div className="post-header">
-            <div className="avatar avatar-large" style={{ background: "var(--li-red)", fontSize: 22 }}>🔥</div>
+            <div className="avatar avatar-large" style={{ background: "var(--li-red)", fontSize: 22 }}>{"\u{1F525}"}</div>
             <div>
               <div style={{ fontSize: 14, fontWeight: 500 }}>The Roast</div>
               <div style={{ fontSize: 12, color: "var(--li-muted)" }}>Profile Analysis Division</div>
@@ -1186,7 +1387,7 @@ function RoastProfile({ apiKey }) {
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 6 }}>What your profile is actually saying:</div>
               {result.subtext.map((s, i) => (
-                <div className="subtext-pill slide-up" key={i} style={{ animationDelay: `${i * 0.1}s` }}>• {s}</div>
+                <div className="subtext-pill slide-up" key={i} style={{ animationDelay: `${i * 0.1}s` }}>{"\u2022"} {s}</div>
               ))}
             </div>
           )}
@@ -1217,7 +1418,7 @@ function RoastProfile({ apiKey }) {
           <div className="btn-group">
             <button className="btn-primary" onClick={copyShare}>Copy to clipboard</button>
             <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(shareText); setCopyMsg("Copied to clipboard! Paste it into the LinkedIn post composer."); setTimeout(() => setCopyMsg(""), 4000); window.open("https://www.linkedin.com/feed/?shareActive=true", "_blank"); }}>
-              Post to LinkedIn ↗
+              Post to LinkedIn {"\u2197"}
             </button>
           </div>
           {copyMsg && <div className="copy-confirm">{copyMsg}</div>}
@@ -1261,7 +1462,7 @@ function FixHeadline({ apiKey }) {
     setLoading(true); setError("");
 
     const prompt = linkedinMode
-      ? `Rewrite this as a LinkedIn headline that's professional and polished but NOT cliché. Use one pipe character maximum. No "passionate about," "results-driven," "leveraging," or "synergies." Sound like a senior professional, not a buzzword generator.\n\nWhat they do: "${userInput}"\n\nWrite ONE headline. Under 15 words. Just the headline.`
+      ? `Rewrite this as a LinkedIn headline that's professional and polished but NOT clich\u00E9. Use one pipe character maximum. No "passionate about," "results-driven," "leveraging," or "synergies." Sound like a senior professional, not a buzzword generator.\n\nWhat they do: "${userInput}"\n\nWrite ONE headline. Under 15 words. Just the headline.`
       : `Rewrite this LinkedIn headline to be direct, specific, and human. No buzzwords. No pipe characters unless genuinely necessary. No "passionate about." Sound like a real person with a real job.\n\nWhat they do: "${userInput}"\nExisting headline (if any): "${existingHeadline || 'none'}"\n\nWrite ONE headline. Under 15 words. Just the headline, nothing else.`;
 
     try {
@@ -1336,12 +1537,12 @@ function FixHeadline({ apiKey }) {
               Buzzword count: {existingHeadline && oldBuzzwords > 0 && <span className="old-score">{oldBuzzwords}</span>}
               {newBuzzwords}
             </span>
-            <span>·</span>
+            <span>{"\u00B7"}</span>
             <span>
               Pipe characters: {existingHeadline && oldPipes > 0 && <span className="old-score">{oldPipes}</span>}
               {newPipes}
             </span>
-            <span>·</span>
+            <span>{"\u00B7"}</span>
             <span>Readability: Human</span>
           </div>
           {existingHeadline && oldScore > 0 && (
@@ -1381,13 +1582,24 @@ function FixHeadline({ apiKey }) {
           <div className="btn-group">
             <button className="btn-primary" onClick={copyShare}>Copy to clipboard</button>
             <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(shareText); setCopyMsg("Copied to clipboard! Paste it into the LinkedIn post composer."); setTimeout(() => setCopyMsg(""), 4000); window.open("https://www.linkedin.com/feed/?shareActive=true", "_blank"); }}>
-              Post to LinkedIn ↗
+              Post to LinkedIn {"\u2197"}
             </button>
           </div>
         </div>
       )}
     </div>
   );
+}
+
+// Helper function for initial subtitle (outside component)
+function generateSubtitleFn() {
+  const pools = [
+    ["Disruptor", "Innovator", "Visionary", "Catalyst", "Evangelist", "Strategist", "Futurist", "Trailblazer", "Change Agent", "Architect of Change"],
+    ["Keynote Speaker", "Author", "Advisor", "Mentor", "Coach", "Podcaster", "TEDx Alum", "Forbes 30 Under 30 Applicant", "LinkedIn Top Voice (Self-Declared)", "Angel Investor (1 Deal)"],
+    ["Dog Dad", "Cat Mom", "Plant Parent", "Dog Mom", "Cat Dad", "Rescue Dog Advocate", "Proud Parent", "Marathon Runner", "Yoga Enthusiast", "CrossFit Survivor", "Peloton Addict", "Amateur Chef"],
+    ["Coffee", "Matcha", "Oat Milk Flat White", "Cold Brew", "Espresso Martini", "Kombucha", "Mushroom Coffee", "Chai", "Decaf (Just Kidding)"]
+  ];
+  return pools.map(pool => pool[randInt(0, pool.length - 1)]).join(" \u00B7 ");
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
