@@ -1079,10 +1079,11 @@ function BuildPost({ apiKey }) {
   };
 
   const postToLinkedIn = () => {
-    navigator.clipboard.writeText(buildShareText());
+    const text = buildShareText();
+    navigator.clipboard.writeText(text);
     setCopyMsg("Copied to clipboard! Paste it into LinkedIn.");
     setTimeout(() => setCopyMsg(""), 4000);
-    window.open("https://www.linkedin.com/sharing/share-offsite/?url=https://kupolab.github.io/thought-leader-5000", "_blank");
+    window.open("https://www.linkedin.com/feed/?shareActive=true&text=" + encodeURIComponent(text), "_blank");
   };
 
   return (
@@ -1568,7 +1569,7 @@ function FixHeadline({ apiKey }) {
           <div className="share-text">{shareText}</div>
           <div className="btn-group">
             <button className="btn-primary" onClick={copyShare}>Copy to clipboard</button>
-            <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(shareText); setCopyMsg("Copied to clipboard! Paste it into LinkedIn."); setTimeout(() => setCopyMsg(""), 4000); window.open("https://www.linkedin.com/sharing/share-offsite/?url=https://kupolab.github.io/thought-leader-5000", "_blank"); }}>
+            <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(shareText); setCopyMsg("Copied to clipboard! Paste it into LinkedIn."); setTimeout(() => setCopyMsg(""), 4000); window.open("https://www.linkedin.com/feed/?shareActive=true&text=" + encodeURIComponent(shareText), "_blank"); }}>
               Post to LinkedIn ↗
             </button>
           </div>
