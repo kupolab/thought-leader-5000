@@ -167,13 +167,25 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   font-weight: 500;
 }
 .slot-content { flex: 1; min-width: 0; }
-.slot-pill {
+.slot-pill-wrap {
+  position: relative; overflow: hidden;
   background: var(--li-gray-bg); border: 1px solid var(--li-border);
-  border-radius: 8px; padding: 8px 12px; font-size: 13px;
-  color: var(--li-text); line-height: 1.5;
-  transition: all 0.2s; cursor: default;
+  border-radius: 8px; min-height: 38px;
 }
-.slot-pill.spinning { animation: slotBounce 0.1s ease-in-out; }
+.slot-pill-wrap.spinning {
+  background: #d8d6d1; border-color: var(--li-blue);
+}
+.slot-pill {
+  padding: 8px 12px; font-size: 13px;
+  color: var(--li-text); line-height: 1.5;
+  cursor: default; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.slot-pill-wrap.spinning .slot-pill {
+  color: var(--li-muted);
+}
+.slot-pill.landing {
+  animation: slotLand 80ms ease-out;
+}
 .slot-toggle {
   font-size: 11px; color: var(--li-blue); cursor: pointer;
   margin-top: 4px; display: inline-block;
@@ -182,16 +194,25 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 .slot-spin { padding-top: 6px; }
 .slot-spin .btn-ghost { transition: transform 0.2s; }
 .slot-spin .btn-ghost:hover { transform: rotate(45deg); }
-.slot-spin .btn-ghost.spinning { animation: spinRotate 0.5s ease-out; }
+.slot-spin .btn-ghost.spinning { animation: spinRotate 0.6s ease-out; }
 
 @keyframes spinRotate {
   0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  100% { transform: rotate(720deg); }
 }
-@keyframes slotBounce {
-  0% { transform: translateY(0); opacity: 0.5; }
-  50% { transform: translateY(-2px); opacity: 0.7; }
-  100% { transform: translateY(0); opacity: 1; }
+@keyframes slotLand {
+  0% { transform: scale(1.02) translateY(-1px); }
+  100% { transform: scale(1) translateY(0); }
+}
+@keyframes slotCycle {
+  0% { transform: translateY(100%); opacity: 0.4; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(-100%); opacity: 0.4; }
+}
+.slot-topic-note {
+  font-size: 11px; color: var(--li-muted); font-style: italic;
+  margin-top: 4px; line-height: 1.4;
 }
 
 /* Avatar */
@@ -907,26 +928,58 @@ function BuildPost({ apiKey }) {
   const [haterName, setHaterName] = useState("");
   const [genKey, setGenKey] = useState(0);
   const [subtitle, setSubtitle] = useState(() => pickRandom(SUBTITLES));
+  const [landing, setLanding] = useState([false, false, false, false]);
+  const [freeTopic, setFreeTopic] = useState("");
   const loadingInterval = useRef(null);
+  const spinTimers = useRef([]);
   const [showToast, toastEl] = useToast();
+  const audioCtx = useRef(null);
 
   const [typedPost, typingDone] = useTypewriter(generatedPost, 10);
 
-  const animateSpin = (slotIndex, finalValue) => {
+  const playTick = (freq = 800, vol = 0.08, dur = 5) => {
+    try {
+      if (!audioCtx.current) audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = audioCtx.current;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      gain.gain.value = vol;
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + dur / 1000);
+    } catch (e) {}
+  };
+
+  const animateSpin = (slotIndex, finalValue, extraDelay = 0) => {
     setSpinning(prev => { const n = [...prev]; n[slotIndex] = true; return n; });
     const arr = ALL_SLOTS[slotIndex];
-    let cycles = 0;
-    const totalCycles = 4 + Math.floor(Math.random() * 3);
-    const interval = setInterval(() => {
-      cycles++;
-      if (cycles >= totalCycles) {
-        clearInterval(interval);
-        setSlots(prev => { const n = [...prev]; n[slotIndex] = finalValue; return n; });
-        setSpinning(prev => { const n = [...prev]; n[slotIndex] = false; return n; });
-      } else {
-        setSlots(prev => { const n = [...prev]; n[slotIndex] = arr[Math.floor(Math.random() * arr.length)]; return n; });
-      }
-    }, 80);
+    const totalDuration = 600 + extraDelay;
+    const steps = [];
+    let elapsed = 0;
+    let interval = 40;
+    while (elapsed < totalDuration - 120) {
+      steps.push({ time: elapsed, value: arr[Math.floor(Math.random() * arr.length)] });
+      elapsed += interval;
+      interval = Math.min(120, interval + 6);
+    }
+    steps.push({ time: totalDuration, value: finalValue });
+
+    steps.forEach((step, idx) => {
+      const timer = setTimeout(() => {
+        setSlots(prev => { const n = [...prev]; n[slotIndex] = step.value; return n; });
+        if (idx < steps.length - 1) {
+          playTick(800, 0.06, 5);
+        }
+        if (idx === steps.length - 1) {
+          playTick(600, 0.12, 10);
+          setSpinning(prev => { const n = [...prev]; n[slotIndex] = false; return n; });
+          setLanding(prev => { const n = [...prev]; n[slotIndex] = true; return n; });
+          setTimeout(() => setLanding(prev => { const n = [...prev]; n[slotIndex] = false; return n; }), 100);
+        }
+      }, step.time);
+      spinTimers.current.push(timer);
+    });
   };
 
   const spinSlot = (i) => {
@@ -939,9 +992,11 @@ function BuildPost({ apiKey }) {
   };
 
   const spinAll = () => {
+    spinTimers.current.forEach(t => clearTimeout(t));
+    spinTimers.current = [];
     const finals = ALL_SLOTS.map((arr, i) => pickRandom(arr, slots[i]));
     finals.forEach((val, i) => {
-      setTimeout(() => animateSpin(i, val), i * 120);
+      animateSpin(i, val, i * 50);
     });
     const newCount = spinCount + 4;
     setSpinCount(newCount);
@@ -970,9 +1025,10 @@ function BuildPost({ apiKey }) {
     }, 1400);
 
     try {
+      const topicLine = freeTopic.trim() ? `\nThe post should be specifically about: "${freeTopic.trim()}"` : "";
       const result = await callAnthropic(apiKey, [{
         role: "user",
-        content: `You are generating content for a LinkedIn satire tool. Write a hilariously bad LinkedIn post that sounds EXACTLY like a real LinkedIn post — overly inspirational, humblebraggy, full of corporate buzzwords, with unnecessary line breaks and engagement bait.\n\nHook: "${getSlotValue(0)}"\nCore message: "${getSlotValue(1)}"\nIndustry context: "${getSlotValue(2)}"\nClosing line: "${getSlotValue(3)}"\n\nWrite 8-12 lines. No preamble. Just the post.`
+        content: `You are generating content for a LinkedIn satire tool. Write a hilariously bad LinkedIn post that sounds EXACTLY like a real LinkedIn post — overly inspirational, humblebraggy, full of corporate buzzwords, with unnecessary line breaks and engagement bait.\n\nHook: "${getSlotValue(0)}"\nCore message: "${getSlotValue(1)}"\nIndustry context: "${getSlotValue(2)}"\nClosing line: "${getSlotValue(3)}"${topicLine}\n\nWrite 8-12 lines. No preamble. Just the post.`
       }], 400);
       setGeneratedPost(result);
       setGenKey(k => k + 1);
@@ -1050,7 +1106,9 @@ function BuildPost({ apiKey }) {
                 </div>
               ) : (
                 <div>
-                  <div className={`slot-pill ${spinning[i] ? "spinning" : ""}`}>{slots[i]}</div>
+                  <div className={`slot-pill-wrap ${spinning[i] ? "spinning" : ""}`}>
+                    <div className={`slot-pill ${landing[i] ? "landing" : ""}`}>{slots[i]}</div>
+                  </div>
                   <span className="slot-toggle" onClick={() => toggleCustom(i)}>✏ Write your own</span>
                 </div>
               )}
@@ -1062,6 +1120,15 @@ function BuildPost({ apiKey }) {
             )}
           </div>
         ))}
+
+        {/* Free-text topic slot */}
+        <div className="slot-row">
+          <div className="slot-label">Topic</div>
+          <div className="slot-content">
+            <textarea rows={2} placeholder={"Optional \u2014 what's this actually about?\ne.g. my morning routine, getting laid off, why I stopped checking email"} value={freeTopic} onChange={e => setFreeTopic(e.target.value)} />
+            <div className="slot-topic-note">Add a topic to make your post more specific. Leave blank to let the slots decide.</div>
+          </div>
+        </div>
       </div>
 
       {/* Generate button */}
