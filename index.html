@@ -7,6 +7,7 @@
 <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -830,13 +831,27 @@ function App() {
   const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
   const [contactSent, setContactSent] = useState(false);
 
+  const [contactSending, setContactSending] = useState(false);
+  const [contactError, setContactError] = useState("");
+
   const sendContact = () => {
     const { name, email, message } = contactForm;
-    const subject = encodeURIComponent("Thought Leader 5000 — Message from " + (name || "Anonymous"));
-    const body = encodeURIComponent("From: " + (name || "Anonymous") + "\nEmail: " + (email || "Not provided") + "\n\n" + message);
-    window.open("mailto:hikupolab@gmail.com?subject=" + subject + "&body=" + body);
-    setContactSent(true);
-    setTimeout(() => { setContactSent(false); setShowContact(false); setContactForm({ name: "", email: "", message: "" }); }, 3000);
+    setContactSending(true);
+    setContactError("");
+    emailjs.send("service_kgoscvt", "template_s4m7zbk", {
+      from_name: name || "Anonymous",
+      from_email: email || "Not provided",
+      message: message
+    }, "oCXpTgevSZ1NgRtvu")
+    .then(() => {
+      setContactSending(false);
+      setContactSent(true);
+      setTimeout(() => { setContactSent(false); setShowContact(false); setContactForm({ name: "", email: "", message: "" }); }, 3000);
+    })
+    .catch((err) => {
+      setContactSending(false);
+      setContactError("Failed to send. Try again or email hikupolab@gmail.com directly.");
+    });
   };
 
   const saveKey = (k) => { setApiKey(k); localStorage.setItem("tl5000_apikey", k); };
@@ -893,11 +908,12 @@ function App() {
                   value={contactForm.message} onChange={e => setContactForm(f => ({...f, message: e.target.value}))}
                   style={{ width: "100%", marginBottom: 16, boxSizing: "border-box", resize: "vertical" }}
                 />
+                {contactError && <div style={{ color: "var(--li-red)", fontSize: 12, marginBottom: 8 }}>{contactError}</div>}
                 <div style={{ display: "flex", gap: 8 }}>
                   <button className="btn-primary" onClick={sendContact}
-                    disabled={!contactForm.message.trim()}
+                    disabled={!contactForm.message.trim() || contactSending}
                     style={{ flex: 1 }}>
-                    Send message
+                    {contactSending ? "Sending..." : "Send message"}
                   </button>
                   <button className="btn-outline" onClick={() => setShowContact(false)} style={{ flex: 0 }}>
                     Cancel
