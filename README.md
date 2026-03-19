@@ -17,5 +17,3 @@ Open `index.html` in a browser. Enter your Anthropic API key (stored in localSto
 No build step. No dependencies. Just one HTML file.
 
 ## A Kupolab Production
-
-[Play on itch.io](https://kupolab.itch.io/thought-leader-5000)
