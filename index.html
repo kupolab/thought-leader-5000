@@ -826,6 +826,18 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem("tl5000_welcomed"));
+  const [showContact, setShowContact] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
+  const [contactSent, setContactSent] = useState(false);
+
+  const sendContact = () => {
+    const { name, email, message } = contactForm;
+    const subject = encodeURIComponent("Thought Leader 5000 — Message from " + (name || "Anonymous"));
+    const body = encodeURIComponent("From: " + (name || "Anonymous") + "\nEmail: " + (email || "Not provided") + "\n\n" + message);
+    window.open("mailto:hikupolab@gmail.com?subject=" + subject + "&body=" + body);
+    setContactSent(true);
+    setTimeout(() => { setContactSent(false); setShowContact(false); setContactForm({ name: "", email: "", message: "" }); }, 3000);
+  };
 
   const saveKey = (k) => { setApiKey(k); localStorage.setItem("tl5000_apikey", k); };
   const handleSave = () => {
@@ -840,6 +852,62 @@ function App() {
   return (
     <div>
       {showWelcome && <WelcomeModal onDismiss={() => setShowWelcome(false)} />}
+      {showContact && (
+        <div className="welcome-overlay" onClick={e => { if (e.target === e.currentTarget) setShowContact(false); }}>
+          <div className="welcome-modal" style={{ maxWidth: 440 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: "50%", background: "var(--li-blue)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "white", fontSize: 16, fontWeight: 700
+              }}>✉</div>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 500 }}>Contact Kupolab</div>
+                <div style={{ fontSize: 12, color: "var(--li-muted)" }}>We read every message. Even the roasts.</div>
+              </div>
+            </div>
+            <hr style={{ border: "none", borderTop: "1px solid var(--li-border)", margin: "0 0 16px 0" }} />
+            {contactSent ? (
+              <div style={{ textAlign: "center", padding: "20px 0" }}>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>✅</div>
+                <div style={{ fontSize: 14, fontWeight: 500, color: "var(--li-green)" }}>Your email client should open now.</div>
+                <div style={{ fontSize: 12, color: "var(--li-muted)", marginTop: 4 }}>Thanks for reaching out!</div>
+              </div>
+            ) : (
+              <div>
+                <label style={{ fontSize: 11, textTransform: "uppercase", color: "var(--li-muted)", display: "block", marginBottom: 4 }}>Your name</label>
+                <input
+                  type="text" placeholder="e.g. A Visionary Professional"
+                  value={contactForm.name} onChange={e => setContactForm(f => ({...f, name: e.target.value}))}
+                  style={{ width: "100%", marginBottom: 12, boxSizing: "border-box" }}
+                />
+                <label style={{ fontSize: 11, textTransform: "uppercase", color: "var(--li-muted)", display: "block", marginBottom: 4 }}>Your email</label>
+                <input
+                  type="email" placeholder="you@company.com"
+                  value={contactForm.email} onChange={e => setContactForm(f => ({...f, email: e.target.value}))}
+                  style={{ width: "100%", marginBottom: 12, boxSizing: "border-box" }}
+                />
+                <label style={{ fontSize: 11, textTransform: "uppercase", color: "var(--li-muted)", display: "block", marginBottom: 4 }}>Message</label>
+                <textarea
+                  rows={4} placeholder="What's on your mind? Feedback, ideas, partnership inquiries, or just say hi."
+                  value={contactForm.message} onChange={e => setContactForm(f => ({...f, message: e.target.value}))}
+                  style={{ width: "100%", marginBottom: 16, boxSizing: "border-box", resize: "vertical" }}
+                />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button className="btn-primary" onClick={sendContact}
+                    disabled={!contactForm.message.trim()}
+                    style={{ flex: 1 }}>
+                    Send message
+                  </button>
+                  <button className="btn-outline" onClick={() => setShowContact(false)} style={{ flex: 0 }}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <header className="header">
         <div className="header-row1">
           <div className="header-left">
@@ -879,6 +947,10 @@ function App() {
           {" · "}
           <a href="#" onClick={e => { e.preventDefault(); showIntro(); }}>
             About
+          </a>
+          {" · "}
+          <a href="#" onClick={e => { e.preventDefault(); setShowContact(true); }}>
+            ✉ Contact
           </a>
           {showSettings && (
             <div className="settings-panel">
