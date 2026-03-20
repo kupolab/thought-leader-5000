@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frenchie Fart Tracker 💨</title>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #FFF8F0;
+  --card: #FFFFFF;
+  --border: #E5E7EB;
+  --border-dark: #D1D5DB;
+  --text: #111827;
+  --muted: #6B7280;
+  --hint: #9CA3AF;
+  --primary: #7C3AED;
+  --primary-light: #EDE9FE;
+  --primary-dark: #5B21B6;
+  --accent: #F59E0B;
+  --accent-light: #FEF3C7;
+  --danger: #EF4444;
+  --danger-light: #FEE2E2;
+  --success: #10B981;
+  --success-light: #D1FAE5;
+  --header: #1F1135;
+  --stink-1: #10B981;
+  --stink-2: #84CC16;
+  --stink-3: #F59E0B;
+  --stink-4: #EF4444;
+  --stink-5: #7C3AED;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: var(--header);
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.header-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+.header-logo {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-logo span { color: var(--accent); }
+
+/* Nav tabs */
+.nav {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 56px;
+  z-index: 99;
+}
+.nav-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-tab {
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.nav-tab:hover { color: var(--primary); }
+.nav-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* Main content */
+.main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+/* Dog selector */
+.dog-selector {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scrollbar-width: none;
+  margin-bottom: 24px;
+}
+.dog-selector::-webkit-scrollbar { display: none; }
+.dog-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  min-width: 64px;
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  padding: 0;
+}
+.dog-chip-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  font-size: 28px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.dog-chip-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dog-chip.selected .dog-chip-avatar {
+  border-color: var(--primary);
+  transform: scale(1.08);
+}
+.dog-chip-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  max-width: 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+.dog-chip.selected .dog-chip-name { color: var(--primary); font-weight: 700; }
+.add-dog-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  min-width: 64px;
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  padding: 0;
+}
+.add-dog-chip-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px dashed var(--border-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 24px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.add-dog-chip:hover .add-dog-chip-circle {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.add-dog-chip-name {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Form elements */
+.field { margin-bottom: 16px; }
+.label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.label-hint {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 12px;
+}
+input[type="text"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  background: #fff;
+  transition: border-color 0.15s;
+  outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+}
+textarea { resize: vertical; min-height: 80px; }
+
+/* Stinkiness selector */
+.stink-row {
+  display: flex;
+  gap: 8px;
+}
+.stink-btn {
+  flex: 1;
+  padding: 10px 4px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+}
+.stink-btn .emoji { font-size: 22px; }
+.stink-btn .lvl { font-size: 11px; font-weight: 600; color: var(--muted); }
+.stink-btn.selected-1 { border-color: var(--stink-1); background: #D1FAE5; }
+.stink-btn.selected-2 { border-color: var(--stink-2); background: #ECFCCB; }
+.stink-btn.selected-3 { border-color: var(--stink-3); background: var(--accent-light); }
+.stink-btn.selected-4 { border-color: var(--stink-4); background: var(--danger-light); }
+.stink-btn.selected-5 { border-color: var(--stink-5); background: var(--primary-light); }
+.stink-btn:hover { transform: translateY(-2px); }
+
+/* Food chips */
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.food-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-dark);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+  color: var(--muted);
+}
+.food-chip.selected {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+}
+.food-chip:hover { border-color: var(--primary); color: var(--primary); }
+
+/* Buttons */
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-outline {
+  background: #fff;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-outline:hover { background: var(--primary-light); }
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover { background: #DC2626; }
+.btn-ghost {
+  background: none;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--bg); color: var(--text); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-full { width: 100%; justify-content: center; }
+.btn-big {
+  padding: 14px 28px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+/* Empty state */
+.empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+}
+.empty-emoji { font-size: 48px; margin-bottom: 12px; }
+.empty h3 { font-size: 18px; color: var(--text); margin-bottom: 8px; }
+
+/* Fart log cards in history */
+.log-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  animation: cardIn 0.2s ease-out both;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.log-stink-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.log-badge-1 { background: #D1FAE5; }
+.log-badge-2 { background: #ECFCCB; }
+.log-badge-3 { background: var(--accent-light); }
+.log-badge-4 { background: var(--danger-light); }
+.log-badge-5 { background: var(--primary-light); }
+.log-info { flex: 1; min-width: 0; }
+.log-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.log-dog-name { font-weight: 700; font-size: 14px; }
+.log-time { font-size: 12px; color: var(--muted); }
+.log-type { font-size: 12px; color: var(--primary); font-weight: 600; }
+.log-foods {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.log-notes {
+  font-size: 13px;
+  color: var(--text);
+  margin-top: 4px;
+  font-style: italic;
+}
+.log-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.pill {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.pill-room { background: #FEF3C7; color: #92400E; }
+.pill-duration { background: #E0E7FF; color: #3730A3; }
+.log-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+}
+
+/* Dog profile card */
+.dog-profile-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  animation: cardIn 0.2s ease-out both;
+}
+.dog-profile-header {
+  background: linear-gradient(135deg, var(--primary) 0%, #9333EA 100%);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.dog-profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.5);
+  overflow: hidden;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  flex-shrink: 0;
+}
+.dog-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dog-profile-info { flex: 1; min-width: 0; }
+.dog-profile-name { font-size: 22px; font-weight: 800; color: #fff; }
+.dog-profile-details { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+.dog-profile-body { padding: 16px 20px; }
+.dog-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.dog-stat {
+  text-align: center;
+  padding: 12px 8px;
+  background: var(--bg);
+  border-radius: 10px;
+}
+.dog-stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary);
+}
+.dog-stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.dog-profile-actions { display: flex; gap: 8px; }
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.stat-box-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--primary);
+}
+.stat-box-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.chart-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.chart-wrap { position: relative; height: 200px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.15s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+.modal {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.2s ease-out;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.modal-title { font-size: 18px; font-weight: 800; }
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 4px;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--text); }
+
+/* Photo upload */
+.photo-upload {
+  border: 2px dashed var(--border-dark);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.photo-upload:hover { border-color: var(--primary); }
+.photo-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 8px;
+  display: block;
+}
+.photo-placeholder {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+/* Toast */
+.toast-wrap {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  pointer-events: none;
+}
+.toast {
+  background: #111827;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  animation: toastIn 0.2s ease-out;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Row helpers */
+.row { display: flex; align-items: center; gap: 8px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; }
+.mt-4 { margin-top: 4px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.text-muted { color: var(--muted); }
+.text-sm { font-size: 12px; }
+
+/* Filter bar */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.filter-bar select {
+  flex: 1;
+  min-width: 120px;
+  max-width: 200px;
+  padding: 8px 12px;
+}
+
+/* Record banner */
+.record-banner {
+  background: linear-gradient(135deg, #F59E0B, #EF4444);
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Custom food input row */
+.custom-food-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.custom-food-row input {
+  flex: 1;
+  padding: 8px 12px;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* No dogs state */
+.onboard {
+  text-align: center;
+  padding: 60px 20px;
+}
+.onboard h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.onboard p { color: var(--muted); margin-bottom: 24px; }
+
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .dog-profile-stats { grid-template-columns: repeat(3, 1fr); }
+  .stink-btn .lvl { display: none; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Constants ──────────────────────────────────────────────────────────────
+
+const STINKINESS = [
+  { level: 1, emoji: '🌸', label: 'Barely There', color: '#10B981' },
+  { level: 2, emoji: '😐', label: 'Noticeable',   color: '#84CC16' },
+  { level: 3, emoji: '😤', label: 'Oh No',        color: '#F59E0B' },
+  { level: 4, emoji: '🤢', label: 'Evacuate!',    color: '#EF4444' },
+  { level: 5, emoji: '☠️',  label: 'Biohazard',   color: '#7C3AED' },
+];
+
+const FART_TYPES = [
+  { value: 'sbd',          label: 'SBD — Silent But Deadly',  emoji: '👻' },
+  { value: 'squeaker',     label: 'The Squeaker',             emoji: '🐭' },
+  { value: 'machine_gun',  label: 'Machine Gun',              emoji: '💥' },
+  { value: 'rumbler',      label: 'The Rumbler',              emoji: '🌋' },
+  { value: 'foghorn',      label: 'Fog Horn',                 emoji: '📯' },
+  { value: 'long_one',     label: 'The Long One',             emoji: '🎺' },
+  { value: 'sneaky',       label: 'Sneaky Surprise',          emoji: '🫣' },
+  { value: 'combo',        label: 'The Combo',                emoji: '🎰' },
+];
+
+const FOODS = [
+  'Kibble', 'Wet Food', 'Chicken', 'Beef', 'Fish', 'Lamb',
+  'Cheese', 'Dairy', 'Eggs', 'Broccoli', 'Sweet Potato',
+  'Carrots', 'Beans/Legumes', 'Peanut Butter', 'Treats',
+  'People Food', 'Table Scraps', 'Rawhide', 'Bone', 'Fruit',
+];
+
+const DURATIONS = [
+  { value: 'brief',     label: 'Brief (< 5 sec)' },
+  { value: 'moderate',  label: 'Moderate (5–15 sec)' },
+  { value: 'lingering', label: 'Lingering (15–30 sec)' },
+  { value: 'eternal',   label: 'Eternal (30+ sec)' },
+];
+
+const ROOM_CLEARING = [
+  { value: 'none',      label: 'None — we survived' },
+  { value: 'minor',     label: 'Minor discomfort' },
+  { value: 'windows',   label: 'Windows opened' },
+  { value: 'evacuated', label: 'Room evacuated' },
+  { value: 'hazmat',    label: '☣️ Called the vet' },
+];
+
+// ── Utilities ─────────────────────────────────────────────────────────────
+
+const genId = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+
+const now = () => {
+  const d = new Date();
+  return {
+    date: d.toISOString().slice(0, 10),
+    time: d.toTimeString().slice(0, 5),
+  };
+};
+
+const formatDateTime = (date, time) => {
+  const d = new Date(`${date}T${time}`);
+  return d.toLocaleString('en-US', {
+    month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit',
+  });
+};
+
+const calcAge = (birthdate) => {
+  if (!birthdate) return null;
+  const diff = Date.now() - new Date(birthdate).getTime();
+  const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+  const months = Math.floor((diff / (1000 * 60 * 60 * 24 * 30.44)) % 12);
+  if (years === 0) return `${months}mo`;
+  if (months === 0) return `${years}yr`;
+  return `${years}yr ${months}mo`;
+};
+
+const resizeImage = (file, maxSize = 300) =>
+  new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const img = document.createElement('img');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      img.onload = () => {
+        const ratio = Math.min(maxSize / img.width, maxSize / img.height);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+const LS_DOGS = 'fff_dogs';
+const LS_LOGS = 'fff_logs';
+
+const loadDogs = () => { try { return JSON.parse(localStorage.getItem(LS_DOGS)) || []; } catch { return []; } };
+const loadLogs = () => { try { return JSON.parse(localStorage.getItem(LS_LOGS)) || []; } catch { return []; } };
+const saveDogs = (d) => localStorage.setItem(LS_DOGS, JSON.stringify(d));
+const saveLogs = (l) => localStorage.setItem(LS_LOGS, JSON.stringify(l));
+
+const fartLabel = (v) => FART_TYPES.find(f => f.value === v);
+const stinkInfo = (l) => STINKINESS.find(s => s.level === l);
+const roomLabel = (v) => ROOM_CLEARING.find(r => r.value === v);
+const durLabel  = (v) => DURATIONS.find(d => d.value === v);
+
+// ── Toast hook ────────────────────────────────────────────────────────────
+
+const useToast = () => {
+  const [toast, setToast] = useState(null);
+  const show = useCallback((msg, emoji = '✅') => {
+    setToast({ msg, emoji, id: genId() });
+    setTimeout(() => setToast(null), 2800);
+  }, []);
+  return { toast, show };
+};
+
+// ── AddDogModal ───────────────────────────────────────────────────────────
+
+const AddDogModal = ({ dog, onSave, onClose }) => {
+  const [form, setForm] = useState({
+    name: dog?.name || '',
+    photo: dog?.photo || '',
+    birthdate: dog?.birthdate || '',
+    weight: dog?.weight || '',
+    color: dog?.color || '',
+    notes: dog?.notes || '',
+  });
+  const fileRef = useRef();
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleFile = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const data = await resizeImage(file);
+    set('photo', data);
+  };
+
+  const handleSave = () => {
+    if (!form.name.trim()) return;
+    onSave(form);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-header">
+          <div className="modal-title">{dog ? '✏️ Edit Dog' : '🐾 Add a Dog'}</div>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        {/* Photo */}
+        <div className="field">
+          <label className="label">Photo</label>
+          <div className="photo-upload" onClick={() => fileRef.current.click()}>
+            {form.photo
+              ? <img src={form.photo} className="photo-preview" alt="preview" />
+              : <div className="photo-placeholder">🐶</div>
+            }
+            <div className="text-sm text-muted">{form.photo ? 'Click to change' : 'Click to upload'}</div>
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+        </div>
+
+        <div className="field">
+          <label className="label">Name <span style={{color:'var(--danger)'}}>*</span></label>
+          <input type="text" value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Baguette" />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="field">
+            <label className="label">Birthdate</label>
+            <input type="date" value={form.birthdate} onChange={e => set('birthdate', e.target.value)} />
+          </div>
+          <div className="field">
+            <label className="label">Weight (lbs)</label>
+            <input type="number" value={form.weight} onChange={e => set('weight', e.target.value)} placeholder="25" />
+          </div>
+        </div>
+
+        <div className="field">
+          <label className="label">Color / Markings</label>
+          <input type="text" value={form.color} onChange={e => set('color', e.target.value)} placeholder="e.g. brindle with white chest" />
+        </div>
+
+        <div className="field">
+          <label className="label">Notes</label>
+          <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Favorite foods, allergies, vet info..." rows={3} />
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+          <button className="btn btn-outline" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
+          <button
+            className="btn btn-primary"
+            onClick={handleSave}
+            disabled={!form.name.trim()}
+            style={{ flex: 2, opacity: form.name.trim() ? 1 : 0.5 }}
+          >
+            {dog ? 'Save Changes' : '+ Add Dog'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── LogFart view ──────────────────────────────────────────────────────────
+
+const EMPTY_LOG = () => {
+  const { date, time } = now();
+  return {
+    stinkiness: null,
+    type: '',
+    foods: [],
+    customFood: '',
+    duration: '',
+    roomClearing: '',
+    notes: '',
+    date,
+    time,
+  };
+};
+
+const LogFart = ({ dogs, selectedDogId, setSelectedDogId, onLog, toast }) => {
+  const [form, setForm] = useState(EMPTY_LOG());
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const toggleFood = (food) => {
+    setForm(f => ({
+      ...f,
+      foods: f.foods.includes(food) ? f.foods.filter(x => x !== food) : [...f.foods, food],
+    }));
+  };
+
+  const addCustomFood = () => {
+    const food = form.customFood.trim();
+    if (!food || form.foods.includes(food)) { set('customFood', ''); return; }
+    setForm(f => ({ ...f, foods: [...f.foods, food], customFood: '' }));
+  };
+
+  const handleSubmit = () => {
+    if (!selectedDogId) { toast.show('Pick a dog first!', '🐾'); return; }
+    if (!form.stinkiness) { toast.show('Set a stinkiness level!', '👃'); return; }
+    onLog({
+      id: genId(),
+      dogId: selectedDogId,
+      ...form,
+      customFood: undefined,
+    });
+    setForm(EMPTY_LOG());
+    toast.show('Fart logged! 💨', '✅');
+  };
+
+  const dog = dogs.find(d => d.id === selectedDogId);
+
+  if (dogs.length === 0) {
+    return (
+      <div className="onboard">
+        <div style={{ fontSize: 64, marginBottom: 12 }}>🐾</div>
+        <h2>Add your first Frenchie!</h2>
+        <p>Track fart activity for all your French Bulldogs.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Dog selector */}
+      <div className="dog-selector">
+        {dogs.map(d => (
+          <button
+            key={d.id}
+            className={`dog-chip ${selectedDogId === d.id ? 'selected' : ''}`}
+            onClick={() => setSelectedDogId(d.id)}
+          >
+            <div className="dog-chip-avatar">
+              {d.photo ? <img src={d.photo} alt={d.name} /> : '🐶'}
+            </div>
+            <div className="dog-chip-name">{d.name}</div>
+          </button>
+        ))}
+      </div>
+
+      {!selectedDogId && (
+        <div className="empty">
+          <div className="empty-emoji">👆</div>
+          <h3>Select a dog to log</h3>
+        </div>
+      )}
+
+      {selectedDogId && (
+        <div className="card">
+          <div className="card-title">
+            💨 Log a Fart
+            {dog && <span style={{ color: 'var(--muted)', fontWeight: 500, fontSize: 14 }}>for {dog.name}</span>}
+          </div>
+
+          {/* Date & Time */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: 16 }}>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label className="label">Date</label>
+              <input type="date" value={form.date} onChange={e => set('date', e.target.value)} />
+            </div>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label className="label">Time</label>
+              <input type="time" value={form.time} onChange={e => set('time', e.target.value)} />
+            </div>
+          </div>
+
+          {/* Stinkiness */}
+          <div className="field">
+            <label className="label">Stinkiness Level <span style={{color:'var(--danger)'}}>*</span></label>
+            <div className="stink-row">
+              {STINKINESS.map(s => (
+                <button
+                  key={s.level}
+                  className={`stink-btn ${form.stinkiness === s.level ? `selected-${s.level}` : ''}`}
+                  onClick={() => set('stinkiness', s.level)}
+                  title={s.label}
+                >
+                  <span className="emoji">{s.emoji}</span>
+                  <span className="lvl">{s.label}</span>
+                </button>
+              ))}
+            </div>
+            {form.stinkiness && (
+              <div style={{ marginTop: 8, fontSize: 13, color: 'var(--muted)' }}>
+                Level {form.stinkiness}: {stinkInfo(form.stinkiness)?.label}
+              </div>
+            )}
+          </div>
+
+          {/* Type */}
+          <div className="field">
+            <label className="label">Fart Type</label>
+            <select value={form.type} onChange={e => set('type', e.target.value)}>
+              <option value="">— Select type —</option>
+              {FART_TYPES.map(f => (
+                <option key={f.value} value={f.value}>{f.emoji} {f.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Foods */}
+          <div className="field">
+            <label className="label">
+              Recent Foods <span className="label-hint">(what did they eat?)</span>
+            </label>
+            <div className="chip-grid">
+              {FOODS.map(food => (
+                <button
+                  key={food}
+                  className={`food-chip ${form.foods.includes(food) ? 'selected' : ''}`}
+                  onClick={() => toggleFood(food)}
+                >
+                  {food}
+                </button>
+              ))}
+              {form.foods.filter(f => !FOODS.includes(f)).map(cf => (
+                <button
+                  key={cf}
+                  className="food-chip selected"
+                  onClick={() => toggleFood(cf)}
+                >
+                  {cf} ×
+                </button>
+              ))}
+            </div>
+            <div className="custom-food-row">
+              <input
+                type="text"
+                value={form.customFood}
+                onChange={e => set('customFood', e.target.value)}
+                placeholder="Add custom food..."
+                onKeyDown={e => e.key === 'Enter' && addCustomFood()}
+              />
+              <button className="btn btn-ghost btn-sm" onClick={addCustomFood}>Add</button>
+            </div>
+          </div>
+
+          {/* Duration & Room Clearing */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label className="label">Duration</label>
+              <select value={form.duration} onChange={e => set('duration', e.target.value)}>
+                <option value="">— Select —</option>
+                {DURATIONS.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
+              </select>
+            </div>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label className="label">Room Clearing</label>
+              <select value={form.roomClearing} onChange={e => set('roomClearing', e.target.value)}>
+                <option value="">— Select —</option>
+                {ROOM_CLEARING.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="field" style={{ marginTop: 16 }}>
+            <label className="label">Notes</label>
+            <textarea
+              value={form.notes}
+              onChange={e => set('notes', e.target.value)}
+              placeholder="Any other details... witnesses? location? tell us everything."
+              rows={3}
+            />
+          </div>
+
+          <button className="btn btn-primary btn-full btn-big" onClick={handleSubmit}>
+            💨 Log That Fart!
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── History view ──────────────────────────────────────────────────────────
+
+const FartCard = ({ log, dogs, onDelete }) => {
+  const dog = dogs.find(d => d.id === log.dogId);
+  const si = stinkInfo(log.stinkiness);
+  const ft = fartLabel(log.type);
+
+  return (
+    <div className="log-card">
+      <div className={`log-stink-badge log-badge-${log.stinkiness}`}>
+        {si?.emoji}
+      </div>
+      <div className="log-info">
+        <div className="log-meta">
+          {dog && <span className="log-dog-name">{dog.photo ? <img src={dog.photo} alt="" style={{width:16,height:16,borderRadius:'50%',objectFit:'cover',verticalAlign:'middle',marginRight:4}} /> : '🐾'}{dog.name}</span>}
+          {ft && <span className="log-type">{ft.emoji} {ft.label.split('—')[0].trim()}</span>}
+          <span className="log-time">{formatDateTime(log.date, log.time)}</span>
+        </div>
+        {log.foods?.length > 0 && (
+          <div className="log-foods">🍽️ {log.foods.join(', ')}</div>
+        )}
+        {log.notes && <div className="log-notes">"{log.notes}"</div>}
+        <div className="log-pills">
+          {log.duration && <span className="pill pill-duration">{durLabel(log.duration)?.label}</span>}
+          {log.roomClearing && log.roomClearing !== 'none' && (
+            <span className="pill pill-room">{roomLabel(log.roomClearing)?.label}</span>
+          )}
+        </div>
+      </div>
+      <div className="log-actions">
+        <button className="btn btn-ghost btn-sm" onClick={() => onDelete(log.id)} title="Delete">🗑</button>
+      </div>
+    </div>
+  );
+};
+
+const History = ({ logs, dogs }) => {
+  const [filterDog, setFilterDog] = useState('all');
+  const [filterStink, setFilterStink] = useState('all');
+  const [logs_, setLogs_] = useState(logs);
+  const [deleteId, setDeleteId] = useState(null);
+
+  useEffect(() => { setLogs_(logs); }, [logs]);
+
+  const handleDelete = (id) => {
+    const next = logs_.filter(l => l.id !== id);
+    setLogs_(next);
+    saveLogs(next);
+  };
+
+  const filtered = logs_
+    .filter(l => filterDog === 'all' || l.dogId === filterDog)
+    .filter(l => filterStink === 'all' || String(l.stinkiness) === filterStink)
+    .sort((a, b) => new Date(`${b.date}T${b.time}`) - new Date(`${a.date}T${a.time}`));
+
+  return (
+    <div>
+      <div className="filter-bar">
+        <select value={filterDog} onChange={e => setFilterDog(e.target.value)}>
+          <option value="all">All dogs</option>
+          {dogs.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </select>
+        <select value={filterStink} onChange={e => setFilterStink(e.target.value)}>
+          <option value="all">All stink levels</option>
+          {STINKINESS.map(s => <option key={s.level} value={s.level}>{s.emoji} Level {s.level}</option>)}
+        </select>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="empty">
+          <div className="empty-emoji">💨</div>
+          <h3>No farts logged yet</h3>
+          <p style={{color:'var(--muted)'}}>Start logging your Frenchie's finest moments.</p>
+        </div>
+      ) : (
+        filtered.map(log => (
+          <FartCard key={log.id} log={log} dogs={dogs} onDelete={handleDelete} />
+        ))
+      )}
+    </div>
+  );
+};
+
+// ── Stats view ────────────────────────────────────────────────────────────
+
+const BarChart = ({ data }) => {
+  const canvasRef = useRef();
+  const chartRef = useRef();
+
+  useEffect(() => {
+    if (!canvasRef.current || !window.Chart) return;
+    if (chartRef.current) chartRef.current.destroy();
+    chartRef.current = new Chart(canvasRef.current, {
+      type: 'bar',
+      data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } },
+          x: { grid: { display: false } },
+        },
+      },
+    });
+    return () => { if (chartRef.current) chartRef.current.destroy(); };
+  }, [data]);
+
+  return <canvas ref={canvasRef} />;
+};
+
+const Stats = ({ logs, dogs, selectedDogId }) => {
+  const dogLogs = selectedDogId === 'all' ? logs : logs.filter(l => l.dogId === selectedDogId);
+  const [viewDog, setViewDog] = useState('all');
+
+  const scopedLogs = viewDog === 'all' ? logs : logs.filter(l => l.dogId === viewDog);
+
+  const totalFarts = scopedLogs.length;
+  const avgStink = totalFarts ? (scopedLogs.reduce((a, l) => a + (l.stinkiness || 0), 0) / totalFarts).toFixed(1) : '—';
+  const maxStink = totalFarts ? Math.max(...scopedLogs.map(l => l.stinkiness || 0)) : 0;
+
+  // This week
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const thisWeek = scopedLogs.filter(l => new Date(`${l.date}T${l.time}`) > weekAgo).length;
+
+  // Stinkiness distribution
+  const stinkDist = STINKINESS.map(s => scopedLogs.filter(l => l.stinkiness === s.level).length);
+
+  // Food frequency
+  const foodCount = {};
+  scopedLogs.forEach(l => (l.foods || []).forEach(f => { foodCount[f] = (foodCount[f] || 0) + 1; }));
+  const topFoods = Object.entries(foodCount).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+  // Hour of day
+  const hourCount = Array(24).fill(0);
+  scopedLogs.forEach(l => {
+    if (l.time) hourCount[parseInt(l.time.split(':')[0])]++;
+  });
+  const peakHour = hourCount.indexOf(Math.max(...hourCount));
+  const peakLabel = peakHour < 12
+    ? `${peakHour === 0 ? 12 : peakHour}am`
+    : `${peakHour === 12 ? 12 : peakHour - 12}pm`;
+
+  // Type distribution
+  const typeCount = {};
+  scopedLogs.forEach(l => { if (l.type) typeCount[l.type] = (typeCount[l.type] || 0) + 1; });
+  const topType = Object.entries(typeCount).sort((a, b) => b[1] - a[1])[0];
+  const topTypeFt = topType ? fartLabel(topType[0]) : null;
+
+  // Record fart (highest stink)
+  const recordLog = [...scopedLogs].sort((a, b) => (b.stinkiness || 0) - (a.stinkiness || 0))[0];
+  const recordDog = recordLog ? dogs.find(d => d.id === recordLog.dogId) : null;
+
+  const stinkChartData = {
+    labels: STINKINESS.map(s => `${s.emoji} ${s.level}`),
+    datasets: [{
+      data: stinkDist,
+      backgroundColor: STINKINESS.map(s => s.color + '99'),
+      borderColor: STINKINESS.map(s => s.color),
+      borderWidth: 2,
+      borderRadius: 6,
+    }],
+  };
+
+  const foodChartData = {
+    labels: topFoods.map(([f]) => f),
+    datasets: [{
+      data: topFoods.map(([, c]) => c),
+      backgroundColor: '#7C3AED33',
+      borderColor: '#7C3AED',
+      borderWidth: 2,
+      borderRadius: 6,
+    }],
+  };
+
+  // Last 7 days bar
+  const dayLabels = [];
+  const dayCounts = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000);
+    const key = d.toISOString().slice(0, 10);
+    dayLabels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+    dayCounts.push(scopedLogs.filter(l => l.date === key).length);
+  }
+  const weekChartData = {
+    labels: dayLabels,
+    datasets: [{
+      data: dayCounts,
+      backgroundColor: '#F59E0B66',
+      borderColor: '#F59E0B',
+      borderWidth: 2,
+      borderRadius: 6,
+    }],
+  };
+
+  return (
+    <div>
+      {/* Dog filter */}
+      <div className="filter-bar" style={{ marginBottom: 16 }}>
+        <select value={viewDog} onChange={e => setViewDog(e.target.value)}>
+          <option value="all">All dogs</option>
+          {dogs.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </select>
+      </div>
+
+      {/* Record banner */}
+      {recordLog && recordLog.stinkiness >= 4 && (
+        <div className="record-banner">
+          <span style={{ fontSize: 22 }}>🏆</span>
+          <span>Record fart: Level {recordLog.stinkiness} {stinkInfo(recordLog.stinkiness)?.emoji} by {recordDog?.name} on {formatDateTime(recordLog.date, recordLog.time)}</span>
+        </div>
+      )}
+
+      {/* Summary stats */}
+      <div className="stats-grid">
+        <div className="stat-box">
+          <div className="stat-box-value">💨 {totalFarts}</div>
+          <div className="stat-box-label">Total Farts Logged</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-box-value">📅 {thisWeek}</div>
+          <div className="stat-box-label">This Week</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-box-value">📊 {avgStink}</div>
+          <div className="stat-box-label">Avg Stinkiness</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-box-value">{maxStink ? stinkInfo(maxStink)?.emoji : '—'} {maxStink || '—'}</div>
+          <div className="stat-box-label">Peak Stinkiness</div>
+        </div>
+      </div>
+
+      {/* Extra stats row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
+        <div className="stat-box">
+          <div className="stat-box-value" style={{ fontSize: 20 }}>🕐 {totalFarts ? peakLabel : '—'}</div>
+          <div className="stat-box-label">Peak Fart Hour</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-box-value" style={{ fontSize: 20 }}>
+            {topTypeFt ? topTypeFt.emoji : '—'}
+          </div>
+          <div className="stat-box-label">Fav Fart Type{topTypeFt ? `: ${topTypeFt.label.split('—')[0].trim()}` : ''}</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-box-value" style={{ fontSize: 20 }}>
+            {topFoods.length > 0 ? '🍽️' : '—'}
+          </div>
+          <div className="stat-box-label">Top Culprit: {topFoods[0]?.[0] || 'Unknown'}</div>
+        </div>
+      </div>
+
+      {totalFarts === 0 ? (
+        <div className="empty">
+          <div className="empty-emoji">📊</div>
+          <h3>No data yet</h3>
+          <p style={{color:'var(--muted)'}}>Log some farts and stats will appear here.</p>
+        </div>
+      ) : (
+        <>
+          <div className="chart-card">
+            <div className="chart-title">📅 Last 7 Days</div>
+            <div className="chart-wrap"><BarChart data={weekChartData} /></div>
+          </div>
+
+          <div className="chart-card">
+            <div className="chart-title">👃 Stinkiness Distribution</div>
+            <div className="chart-wrap"><BarChart data={stinkChartData} /></div>
+          </div>
+
+          {topFoods.length > 0 && (
+            <div className="chart-card">
+              <div className="chart-title">🍽️ Foods Most Often Present</div>
+              <div className="chart-wrap"><BarChart data={foodChartData} /></div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+// ── Dogs (manage) view ────────────────────────────────────────────────────
+
+const ManageDogs = ({ dogs, logs, onEdit, onDelete, onAdd }) => {
+  if (dogs.length === 0) {
+    return (
+      <div className="onboard">
+        <div style={{ fontSize: 64, marginBottom: 12 }}>🐾</div>
+        <h2>No dogs yet!</h2>
+        <p>Add your first French Bulldog to get started.</p>
+        <button className="btn btn-primary btn-big" onClick={onAdd}>+ Add Dog</button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <button className="btn btn-primary" onClick={onAdd}>+ Add Dog</button>
+      </div>
+      {dogs.map(dog => {
+        const dogLogs = logs.filter(l => l.dogId === dog.id);
+        const avgStink = dogLogs.length
+          ? (dogLogs.reduce((a, l) => a + (l.stinkiness || 0), 0) / dogLogs.length).toFixed(1)
+          : '—';
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const thisWeek = dogLogs.filter(l => new Date(`${l.date}T${l.time}`) > weekAgo).length;
+
+        return (
+          <div key={dog.id} className="dog-profile-card">
+            <div className="dog-profile-header">
+              <div className="dog-profile-avatar">
+                {dog.photo ? <img src={dog.photo} alt={dog.name} /> : '🐶'}
+              </div>
+              <div className="dog-profile-info">
+                <div className="dog-profile-name">{dog.name}</div>
+                <div className="dog-profile-details">
+                  {dog.birthdate && <span>{calcAge(dog.birthdate)} old · </span>}
+                  {dog.weight && <span>{dog.weight} lbs · </span>}
+                  {dog.color && <span>{dog.color}</span>}
+                </div>
+              </div>
+            </div>
+            <div className="dog-profile-body">
+              <div className="dog-profile-stats">
+                <div className="dog-stat">
+                  <div className="dog-stat-value">💨 {dogLogs.length}</div>
+                  <div className="dog-stat-label">Total Farts</div>
+                </div>
+                <div className="dog-stat">
+                  <div className="dog-stat-value">📅 {thisWeek}</div>
+                  <div className="dog-stat-label">This Week</div>
+                </div>
+                <div className="dog-stat">
+                  <div className="dog-stat-value">📊 {avgStink}</div>
+                  <div className="dog-stat-label">Avg Stink</div>
+                </div>
+              </div>
+              {dog.notes && (
+                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12, fontStyle: 'italic' }}>
+                  "{dog.notes}"
+                </div>
+              )}
+              <div className="dog-profile-actions">
+                <button className="btn btn-outline btn-sm" onClick={() => onEdit(dog)}>✏️ Edit</button>
+                <button className="btn btn-ghost btn-sm" onClick={() => onDelete(dog.id)} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}>
+                  🗑 Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// ── App ───────────────────────────────────────────────────────────────────
+
+const TABS = [
+  { id: 'log',     label: '💨 Log Fart' },
+  { id: 'history', label: '📋 History' },
+  { id: 'stats',   label: '📊 Stats' },
+  { id: 'dogs',    label: '🐾 My Dogs' },
+];
+
+const App = () => {
+  const [tab, setTab] = useState('log');
+  const [dogs, setDogs] = useState(loadDogs);
+  const [logs, setLogs] = useState(loadLogs);
+  const [selectedDogId, setSelectedDogId] = useState(() => {
+    const d = loadDogs();
+    return d.length > 0 ? d[0].id : null;
+  });
+  const [showAddDog, setShowAddDog] = useState(false);
+  const [editingDog, setEditingDog] = useState(null);
+  const { toast, show: showToast } = useToast();
+
+  const handleLog = (logEntry) => {
+    const next = [...logs, logEntry];
+    setLogs(next);
+    saveLogs(next);
+  };
+
+  const handleSaveDog = (form) => {
+    let next;
+    if (editingDog) {
+      next = dogs.map(d => d.id === editingDog.id ? { ...editingDog, ...form } : d);
+      showToast(`${form.name} updated!`, '🐾');
+    } else {
+      const newDog = { id: genId(), ...form };
+      next = [...dogs, newDog];
+      setSelectedDogId(newDog.id);
+      showToast(`${form.name} added!`, '🐾');
+    }
+    setDogs(next);
+    saveDogs(next);
+    setShowAddDog(false);
+    setEditingDog(null);
+  };
+
+  const handleDeleteDog = (id) => {
+    const dog = dogs.find(d => d.id === id);
+    if (!window.confirm(`Remove ${dog?.name}? Their fart history will be deleted too.`)) return;
+    const nextDogs = dogs.filter(d => d.id !== id);
+    const nextLogs = logs.filter(l => l.dogId !== id);
+    setDogs(nextDogs);
+    setLogs(nextLogs);
+    saveDogs(nextDogs);
+    saveLogs(nextLogs);
+    if (selectedDogId === id) setSelectedDogId(nextDogs[0]?.id || null);
+    showToast(`${dog?.name} removed`, '🗑');
+  };
+
+  const handleEditDog = (dog) => {
+    setEditingDog(dog);
+    setShowAddDog(true);
+  };
+
+  const openAddDog = () => {
+    setEditingDog(null);
+    setShowAddDog(true);
+  };
+
+  return (
+    <div>
+      {/* Header */}
+      <header className="header">
+        <div className="header-inner">
+          <div className="header-logo">
+            🐾 <span>Frenchie</span> Fart Tracker
+          </div>
+          <button className="btn btn-outline btn-sm" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff' }} onClick={openAddDog}>
+            + Dog
+          </button>
+        </div>
+      </header>
+
+      {/* Nav */}
+      <nav className="nav">
+        <div className="nav-inner">
+          {TABS.map(t => (
+            <button
+              key={t.id}
+              className={`nav-tab ${tab === t.id ? 'active' : ''}`}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* Main */}
+      <main className="main">
+        {tab === 'log' && (
+          <LogFart
+            dogs={dogs}
+            selectedDogId={selectedDogId}
+            setSelectedDogId={setSelectedDogId}
+            onLog={handleLog}
+            toast={{ show: showToast }}
+          />
+        )}
+        {tab === 'history' && (
+          <History logs={logs} dogs={dogs} />
+        )}
+        {tab === 'stats' && (
+          <Stats logs={logs} dogs={dogs} selectedDogId={selectedDogId} />
+        )}
+        {tab === 'dogs' && (
+          <ManageDogs
+            dogs={dogs}
+            logs={logs}
+            onEdit={handleEditDog}
+            onDelete={handleDeleteDog}
+            onAdd={openAddDog}
+          />
+        )}
+      </main>
+
+      {/* Add/Edit Dog Modal */}
+      {showAddDog && (
+        <AddDogModal
+          dog={editingDog}
+          onSave={handleSaveDog}
+          onClose={() => { setShowAddDog(false); setEditingDog(null); }}
+        />
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="toast-wrap">
+          <div className="toast">
+            <span>{toast.emoji}</span>
+            <span>{toast.msg}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
