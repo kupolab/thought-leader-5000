@@ -331,6 +331,54 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus, input[ty
   border-radius: 0 8px 8px 0; padding: 12px 14px; margin-top: 10px;
 }
 
+/* Translation table */
+.translate-table { width: 100%; margin-top: 12px; }
+.translate-header {
+  display: flex; gap: 12px; border-bottom: 1px solid var(--li-border);
+  padding-bottom: 8px; margin-bottom: 8px;
+}
+.translate-header span {
+  font-size: 11px; text-transform: uppercase; color: var(--li-muted); font-weight: 500;
+}
+.translate-header .col-said { width: 48%; }
+.translate-header .col-meant { width: 52%; }
+.translate-row {
+  display: flex; gap: 12px; margin-bottom: 8px;
+}
+.translate-row .col-said {
+  width: 48%; background: #f9f8f5; border-radius: 6px;
+  padding: 10px 12px; font-size: 13px; color: var(--li-muted);
+  font-style: italic; line-height: 1.55;
+}
+.translate-row .col-meant {
+  width: 52%; padding: 10px 12px; font-size: 13px;
+  color: var(--li-text); font-weight: 500; line-height: 1.55;
+}
+@media (max-width: 600px) {
+  .translate-header { display: none; }
+  .translate-row {
+    flex-direction: column; gap: 0;
+    border-bottom: 1px solid var(--li-border); padding-bottom: 10px;
+  }
+  .translate-row .col-said, .translate-row .col-meant { width: 100%; }
+  .translate-row .col-meant::before {
+    content: "\2192 "; font-style: normal; color: var(--li-blue);
+    font-weight: 500;
+  }
+}
+.hidden-agenda-pill {
+  background: #fff3cd; border: 1px solid #ffc107;
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 14px; color: var(--li-text); line-height: 1.6; margin-top: 8px;
+}
+.auth-badge {
+  display: inline-block; border-radius: 12px;
+  padding: 3px 10px; font-size: 12px; font-weight: 500;
+}
+.char-count {
+  font-size: 11px; color: var(--li-hint); text-align: right; margin-top: 4px;
+}
+
 /* Footer */
 .footer {
   text-align: center; padding: 24px 0 32px; font-size: 11px;
@@ -939,7 +987,7 @@ function App() {
 
       <div className="content">
         <div className="mode-selector">
-          {["Build a Post", "Roast My Profile"].map((label, i) => (
+          {["Build a Post", "Roast My Profile", "Translate This Post"].map((label, i) => (
             <button key={i} className={`mode-btn ${mode === i ? "active" : ""}`} onClick={() => setMode(i)}>
               {label}
             </button>
@@ -949,7 +997,8 @@ function App() {
         <div className="mode-panel">
           <div style={{ display: mode === 0 ? "block" : "none" }}><BuildPost apiKey={apiKey} /></div>
           <div style={{ display: mode === 1 ? "block" : "none" }}><RoastProfile apiKey={apiKey} /></div>
-          <div style={{ display: mode === 2 ? "block" : "none" }}><FixHeadline apiKey={apiKey} /></div>
+          <div style={{ display: mode === 2 ? "block" : "none" }}><TranslatePost apiKey={apiKey} /></div>
+          <div style={{ display: mode === 3 ? "block" : "none" }}><FixHeadline apiKey={apiKey} /></div>
         </div>
 
         <footer className="footer">
@@ -1660,6 +1709,232 @@ function FixHeadline({ apiKey }) {
               Post to LinkedIn ↗
             </button>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+// TRANSLATE POST
+// ════════════════════════════════════════════════════════════
+const TRANSLATE_EXAMPLE = `I'm beyond humbled and grateful to share that after much soul-searching and radical transparency with myself and my co-visionaries, I have decided to embark on a new chapter.
+
+This journey has not been easy. There were 3am moments. There were tears in Ubers. There were people who said it couldn't be done.
+
+But I refused to stop believing in the mission.
+
+Today, I am thrilled to announce that I have accepted a role as Chief Disruption Officer at [Stealth Startup].
+
+The best is yet to come. Who's with me?
+
+Drop a 🔥 if this resonated.`;
+
+const TRANSLATE_LOADING_MSGS = [
+  "Decoding corporate speak...",
+  "Removing the jargon filter...",
+  "Translating from LinkedIn to English...",
+  "Consulting the buzzword dictionary...",
+  "Measuring authenticity levels...",
+  "Parsing the humble-brag coefficient...",
+];
+
+function TranslatePost({ apiKey }) {
+  const [postText, setPostText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState(null);
+  const [copyMsg, setCopyMsg] = useState("");
+  const [loadingMsg, setLoadingMsg] = useState(TRANSLATE_LOADING_MSGS[0]);
+  const loadingRef = useRef(null);
+
+  useEffect(() => {
+    if (!loading) { if (loadingRef.current) clearInterval(loadingRef.current); return; }
+    let i = 0;
+    loadingRef.current = setInterval(() => {
+      i = (i + 1) % TRANSLATE_LOADING_MSGS.length;
+      setLoadingMsg(TRANSLATE_LOADING_MSGS[i]);
+    }, 1400);
+    return () => clearInterval(loadingRef.current);
+  }, [loading]);
+
+  const translate = async () => {
+    if (!postText.trim()) return;
+    setLoading(true);
+    setError("");
+    setResult(null);
+    try {
+      const raw = await callAnthropic(apiKey, [{
+        role: "user",
+        content: `You are the Translator in a LinkedIn satire tool called Thought Leader 5000. Someone pasted a LinkedIn post and wants to know what it actually says in plain English.
+
+Analyze this LinkedIn post and translate the corporate speak, buzzwords, and humblebrag language into direct, honest English. Be funny through accuracy — don't exaggerate, just reveal what the words actually mean.
+
+Post to translate:
+"${postText}"
+
+Respond in EXACTLY this JSON format (no markdown, no code fences, just raw JSON):
+{
+  "translations": [
+    {"said": "exact phrase from their post", "meant": "what it actually means in plain English"},
+    {"said": "another phrase", "meant": "what it actually means"},
+    {"said": "another phrase", "meant": "what it actually means"}
+  ],
+  "hidden_agenda": "One sentence describing what the author actually wanted you to take away from this post.",
+  "authenticity_score": 25,
+  "score_reason": "Brief 5-8 word reason for the score"
+}
+
+Rules:
+- Pick 4-6 of the most LinkedIn-y phrases to translate. Don't translate every sentence.
+- Translations should be funny but accurate — not mean, just honest.
+- The hidden agenda should be insightful and specific to THIS post.
+- Authenticity score: 1-100 where 1 is "pure corporate theater" and 100 is "actually human". Most LinkedIn posts score 15-45.
+- Return ONLY valid JSON. No other text.`
+      }], 600);
+
+      let parsed;
+      try {
+        const cleaned = raw.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+        parsed = JSON.parse(cleaned);
+      } catch (e) {
+        throw new Error("Failed to parse translation response");
+      }
+      setResult(parsed);
+    } catch (e) {
+      setError(e.message || "Something went wrong. The corporate jargon was too strong.");
+    }
+    setLoading(false);
+  };
+
+  const tryExample = () => { setPostText(TRANSLATE_EXAMPLE); setResult(null); setError(""); };
+  const translateAnother = () => { setPostText(""); setResult(null); setError(""); };
+
+  const getScoreStyle = (score) => {
+    if (score <= 30) return { bg: "#fdecea", color: "#c0392b", label: "Extremely LinkedIn" };
+    if (score <= 60) return { bg: "#fff3e0", color: "#e65100", label: "Peak LinkedIn" };
+    if (score <= 80) return { bg: "#e8f5e9", color: "#2e7d32", label: "Aspirationally LinkedIn" };
+    return { bg: "var(--li-blue-light)", color: "var(--li-blue)", label: "Almost Human" };
+  };
+
+  const buildShareText = () => {
+    if (!result) return "";
+    const lines = [];
+    lines.push("Ran a LinkedIn post through the Thought Leader 5000 translator.\n");
+    const items = (result.translations || []).slice(0, 3);
+    items.forEach(t => {
+      lines.push(`They said: "${t.said}"`);
+      lines.push(`They meant: "${t.meant}"\n`);
+    });
+    if (result.hidden_agenda) lines.push(`Hidden agenda: ${result.hidden_agenda}\n`);
+    const s = getScoreStyle(result.authenticity_score || 25);
+    lines.push(`Authenticity score: ${result.authenticity_score || "?"}/100 — ${s.label}\n`);
+    lines.push("kupolab.github.io/thought-leader-5000");
+    return lines.join("\n");
+  };
+
+  const copyShare = () => {
+    const text = buildShareText();
+    navigator.clipboard.writeText(text);
+    setCopyMsg("Copied. The truth shall set you free.");
+    setTimeout(() => setCopyMsg(""), 3000);
+  };
+
+  const postToLinkedIn = () => {
+    const text = buildShareText();
+    navigator.clipboard.writeText(text);
+    setCopyMsg("Copied to clipboard! Paste it into LinkedIn.");
+    setTimeout(() => setCopyMsg(""), 4000);
+    window.open("https://www.linkedin.com/feed/?shareActive=true&text=" + encodeURIComponent(text), "_blank");
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 4 }}>Translate this post</div>
+        <div style={{ fontSize: 13, color: "var(--li-muted)", lineHeight: 1.6, marginBottom: 14 }}>
+          Paste any LinkedIn post. Get the plain English version of what they actually said.
+        </div>
+        <label style={{ fontSize: 11, textTransform: "uppercase", color: "var(--li-muted)", display: "block", marginBottom: 6 }}>LINKEDIN POST</label>
+        <textarea
+          rows={8} value={postText} onChange={e => setPostText(e.target.value)}
+          placeholder={"Paste a LinkedIn post here...\n\ne.g. 'I'm humbled and grateful to announce that after a season of radical vulnerability and intentional growth, I am thrilled to share that I have accepted a new role as...'"}
+          style={{ width: "100%", boxSizing: "border-box", resize: "vertical" }}
+        />
+        <div className="char-count">{postText.length} characters</div>
+        {error && <div style={{ color: "var(--li-red)", fontSize: 13, marginTop: 8 }}>{error}</div>}
+        <div className="btn-group" style={{ marginTop: 12 }}>
+          <button className="btn-primary" onClick={translate} disabled={loading || !postText.trim()}
+            style={{ maxWidth: 280 }}>
+            {loading ? "Translating..." : "Translate"}
+          </button>
+          <button className="btn-outline" onClick={tryExample}>Try an example</button>
+        </div>
+      </div>
+
+      {loading && (
+        <div className="card" style={{ marginTop: 10 }}>
+          <div className="skeleton" style={{ width: "90%" }} />
+          <div className="skeleton" style={{ width: "75%" }} />
+          <div className="skeleton" style={{ width: "85%" }} />
+          <div className="skeleton" style={{ width: "60%" }} />
+          <div className="loading-message">{loadingMsg}</div>
+        </div>
+      )}
+
+      {result && (
+        <div className="card card-enter" style={{ marginTop: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 16 }}>🔍</span>
+              <span style={{ fontSize: 14, fontWeight: 500 }}>Plain English Translation</span>
+            </div>
+          </div>
+          <hr style={{ border: "none", borderTop: "1px solid var(--li-border)", margin: "12px 0" }} />
+
+          <div className="translate-table">
+            <div className="translate-header">
+              <span className="col-said">THEY SAID</span>
+              <span className="col-meant">THEY MEANT</span>
+            </div>
+            {(result.translations || []).map((t, i) => (
+              <div className="translate-row" key={i}>
+                <div className="col-said">{t.said}</div>
+                <div className="col-meant">{t.meant}</div>
+              </div>
+            ))}
+          </div>
+
+          <hr style={{ border: "none", borderTop: "1px solid var(--li-border)", margin: "16px 0" }} />
+          <div style={{ fontSize: 11, textTransform: "uppercase", color: "var(--li-muted)", fontWeight: 500, marginBottom: 8 }}>HIDDEN AGENDA</div>
+          <div className="hidden-agenda-pill">{result.hidden_agenda}</div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16 }}>
+            <span style={{ fontSize: 12, color: "var(--li-muted)" }}>Authenticity score:</span>
+            <span style={{ fontSize: 13, fontWeight: 500 }}>{result.authenticity_score || "?"}/100</span>
+            {(() => {
+              const s = getScoreStyle(result.authenticity_score || 25);
+              return <span className="auth-badge" style={{ background: s.bg, color: s.color }}>{s.label}</span>;
+            })()}
+          </div>
+
+          <div className="btn-group" style={{ marginTop: 16 }}>
+            <button className="btn-outline" onClick={translateAnother}>Translate another</button>
+            <button className="btn-primary" onClick={copyShare}>Share this translation</button>
+          </div>
+          {copyMsg && <div className="copy-confirm" style={{ marginTop: 6 }}>{copyMsg}</div>}
+        </div>
+      )}
+
+      {result && (
+        <div className="share-card card-enter" style={{ marginTop: 10 }}>
+          <div className="share-label">YOUR SHAREABLE TRANSLATION</div>
+          <div className="share-text">{buildShareText()}</div>
+          <div className="btn-group">
+            <button className="btn-primary" onClick={copyShare}>Copy to clipboard</button>
+            <button className="btn-outline" onClick={postToLinkedIn}>Post to LinkedIn ↗</button>
+          </div>
+          {copyMsg && <div className="copy-confirm" style={{ marginTop: 6 }}>{copyMsg}</div>}
         </div>
       )}
     </div>
